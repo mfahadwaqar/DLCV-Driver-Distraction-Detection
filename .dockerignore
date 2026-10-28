@@ -1,0 +1,12 @@
+.git
+.venv
+.cache
+data
+results
+logs
+checkpoints
+.env*
+**/__pycache__
+*.jpg
+*.png
+*.mp4

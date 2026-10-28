@@ -1,5 +1,8 @@
 # Driver Distraction and Drowsiness Monitoring
 
+See [Kaggle workflow](docs/KAGGLE.md) for committed-code submission, run status,
+and downloading saved experiment outputs to this local repository.
+
 AIT DLCV project. Phase 0 scaffold only: no trained model or inference yet.
 The supplied proposal defines [project scope](docs/SCOPE.md): a lightweight shared
 CNN with six distraction classes and four drowsiness states, temporal driver alerts,

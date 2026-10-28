@@ -1,0 +1,13 @@
+{
+  "id": "mfahadwaqar2002/dlcv-driver-drowsiness-detection",
+  "title": "DLCV-Driver-Drowsiness-Detection",
+  "code_file": "run.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": false,
+  "dataset_sources": [],
+  "competition_sources": ["state-farm-distracted-driver-detection"],
+  "kernel_sources": []
+}

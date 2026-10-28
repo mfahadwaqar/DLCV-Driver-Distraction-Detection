@@ -31,3 +31,7 @@ Keep datasets in ignored `data/`, outputs in `results/`, secrets in environment
 variables. Never commit face imagery or credentials. Fixed seeds, saved subject
 splits, YAML configs and logged package versions are required. Dataset access has
 not been verified; see [dataset register](docs/DATASETS.md).
+
+Training will run on Kaggle Notebooks. Local development and CPU tests/demo stay
+in this repository. Record actual notebook runtime/package/GPU versions per run.
+See docs/DATASETS.md for official sources and access status.

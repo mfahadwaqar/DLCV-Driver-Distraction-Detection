@@ -23,7 +23,9 @@ developer commands and version record. Run empty pytest suite and lint, then com
 STOP for your review of this plan before Phase 1.
 
 ## Assumptions and limitations
-- CPU tests/demo; GPU training optional. Seed 42. Saved subject-wise train/val/test
+- Training runs on Kaggle Notebooks. Local tests/demo run on CPU. Record actual
+  Kaggle Python/package/GPU versions; do not assume parity with local Python 3.11.
+- Seed 42. Saved subject-wise train/val/test
   manifests, target proportions 70/15/15 where subject counts permit. Never split frames.
 - Namespace subject IDs by dataset; investigate cross-dataset identity overlap.
 - MRL crops support open/closed-eye classification only. They do not establish
@@ -66,7 +68,8 @@ Each phase ends with tests/lint, docs/phaseN.md and a Git commit. Never invent r
 1. Review this plan and authorize Phase 1 after setup.
 2. Existing dataset locations or availability to complete access requests. Kaggle
    needs your account/competition acceptance. Keep credentials out of chat and Git.
-3. Training hardware (NVIDIA model/VRAM, Colab or CPU) and disk/download budget.
+3. Kaggle training confirmed; notebook GPU availability and disk/download budget
+   still need checking.
    Ask before downloads over 5 GB or any global installation.
 4. Grading rubric, actual start/final deadline for the eight weeks, required report format.
 5. Permitted full-face temporal data and a separate Gaze off road training source.

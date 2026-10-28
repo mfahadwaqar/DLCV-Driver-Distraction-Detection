@@ -76,10 +76,13 @@ def test_rt_bene_bundle_fetches_official_data_in_private_internet_notebook(tmp_p
     assert "src.data.fetch_rt_bene" in code
     assert "src.data.rt_bene" in code
     assert "--manifest" in code
+    assert "/kaggle/temp/rt-bene/source" in code
+    assert "/kaggle/temp/rt-bene/prepared" in code
     metadata = json.loads((stage / "kernel-metadata.json").read_text())
     assert metadata["is_private"] is True
     assert metadata["enable_internet"] is True
     assert metadata["enable_gpu"] is True
+    assert metadata["competition_sources"] == []
 
 
 def test_missing_auth_is_failure_even_if_cli_returns_zero(monkeypatch):

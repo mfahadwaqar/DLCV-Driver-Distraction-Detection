@@ -22,7 +22,7 @@ def git(*args):
 def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu"):
     if task == "phase1" and not data_root:
         raise ValueError("Phase 1 requires --data-root pointing to an attached Kaggle dataset")
-    if git("status", "--porcelain").strip():
+    if git("status", "--porcelain", "--", "src", "configs", "scripts", "kaggle").strip():
         raise RuntimeError("Commit changes first: runs must use a clean committed snapshot.")
     commit = git("rev-parse", "HEAD").decode().strip()
     # Explicit allowlist: never bundle data, credentials, results, or .git.
@@ -37,7 +37,7 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
         command = ["-m", "src.train.kaggle_entry", "--fast"]
     else:
         if task == "rt-bene":
-            data_root = "/kaggle/working/rt-bene/prepared"
+            data_root = "/kaggle/temp/rt-bene/prepared"
         command = [
             "-m",
             "src.train.phase1",
@@ -58,15 +58,15 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
     if task == "rt-bene":
         data_setup = (
             "subprocess.run([sys.executable, '-m', 'src.data.fetch_rt_bene', "
-            "'--output', '/kaggle/working/rt-bene/source'], cwd=code, check=True)\n"
+            "'--output', '/kaggle/temp/rt-bene/source'], cwd=code, check=True)\n"
             "subprocess.run([sys.executable, '-m', 'src.data.rt_bene', "
-            "'--source', '/kaggle/working/rt-bene/source', '--output', "
-            "'/kaggle/working/rt-bene/prepared'], cwd=code, check=True)\n"
+            "'--source', '/kaggle/temp/rt-bene/source', '--output', "
+            "'/kaggle/temp/rt-bene/prepared'], cwd=code, check=True)\n"
         )
     bootstrap = (
         "import base64, io, zipfile, subprocess, sys\n"
         "from pathlib import Path\n"
-        "code = Path('/kaggle/working/project-code')\n"
+        "code = Path('/kaggle/temp/project-code')\n"
         "code.mkdir(parents=True, exist_ok=True)\n"
         f"zipfile.ZipFile(io.BytesIO(base64.b64decode({payload!r}))).extractall(code)\n"
         f"{data_setup}"
@@ -93,6 +93,8 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
     metadata = json.loads((stage / "kernel-metadata.json").read_text())
     metadata["enable_gpu"] = device == "cuda"
     metadata["enable_internet"] = task == "rt-bene"
+    if task == "rt-bene":
+        metadata["competition_sources"] = []
     (stage / "kernel-metadata.json").write_text(json.dumps(metadata, indent=2))
     (stage / "source.json").write_text(json.dumps({"commit": commit}), encoding="utf-8")
     print(f"Prepared committed source {commit} in {stage}")

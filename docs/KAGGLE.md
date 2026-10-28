@@ -40,3 +40,30 @@ Run --fast on real data first to verify the hosted package/runtime combination.
 No automatic polling or scheduled sync is installed. Fetch results after a saved
 run completes. This workflow does not upload any datasets or face images to GitHub.
 Official reference: https://github.com/Kaggle/kaggle-cli/blob/main/docs/kernels.md
+
+## Repeatable RT-BENE training
+
+Use the local VS Code notebook for interactive checks. Its cells run on Kaggle, but
+the local notebook is a separate file from the Kaggle browser editor. For a durable
+training run, commit and push the code, then submit a saved Kaggle version with:
+
+```powershell
+.\.venv\Scripts\python.exe scripts/kaggle_workflow.py submit --task rt-bene --device cuda
+.\.venv\Scripts\python.exe scripts/kaggle_workflow.py status
+.\.venv\Scripts\python.exe scripts/kaggle_workflow.py fetch-results --version N
+```
+
+The saved run fetches RT-BENE from its official source into `/kaggle/temp`, prepares
+the eye images there, and trains from subject-separated splits. The large source and
+prepared images are temporary and will be fetched again on another run. Only the
+checkpoint, predictions, metrics, splits, configuration, environment and summary go
+under `/kaggle/working/artifacts` and become downloadable saved-version outputs.
+Use the version number shown by Kaggle after `submit` for `fetch-results`. The local
+results folder is timestamped and ignored by Git. Each run records its source commit.
+
+The training loss uses class weights computed only from the training split to address
+the heavy open-eye majority. Inspect per-class recall, confusion matrix and macro F1
+on validation and test; the earlier tiny fast run was only an integration check.
+The generated saved notebook is separate from the readable interactive notebook, so
+submitting it does not replace local VS Code cells. The local notebook's uncommitted
+outputs do not block submitting committed source code.

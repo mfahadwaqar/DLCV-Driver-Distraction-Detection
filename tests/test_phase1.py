@@ -21,7 +21,7 @@ from src.models.rules import (
     pitch_degrees,
 )
 from src.train.losses import masked_cross_entropy
-from src.train.phase1 import encode_labels, image_transform, seed_everything, train
+from src.train.phase1 import encode_labels, image_transform, seed_everything, train, training_class_weights
 
 
 def records():
@@ -208,6 +208,14 @@ def test_supported_yawning_labels_keep_project_mapping():
         encode_labels(torch.tensor([1]), [0, 2])
 
 
+def test_class_weights_use_only_training_counts():
+    rows = [{"label_drowsiness": label} for label in (0, 0, 0, 0, 1)]
+    counts, values, tensor = training_class_weights(rows, [0, 1], "cpu")
+    assert counts == [4, 1]
+    assert values[1] / values[0] == pytest.approx(2)
+    assert tensor.mean().item() == pytest.approx(1)
+
+
 def test_one_cpu_training_step_changes_classifier_weights():
     seed_everything(42)
     model = build_baseline()
@@ -253,6 +261,7 @@ def test_training_pipeline_artifacts_on_synthetic_fixture_only(tmp_path):
     output = tmp_path / "output"
     summary = train(config, data, output, tmp_path / "splits.json", fast=True)
     assert summary["fast"] is True
+    assert set(summary["train_class_counts"].values()) == {4}
     assert (output / "best.pt").is_file()
     assert (output / "test.json").is_file()
     assert (output / "environment.txt").is_file()

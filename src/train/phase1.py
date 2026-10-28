@@ -4,6 +4,7 @@ import argparse
 import csv
 import importlib.metadata
 import json
+import math
 import os
 import platform
 import random
@@ -77,6 +78,17 @@ def encode_labels(labels, class_ids):
     return encoded
 
 
+def training_class_weights(rows, class_ids, device):
+    """Balance supervised classes using training subjects only."""
+    counts = [sum(r["label_drowsiness"] == state for r in rows) for state in class_ids]
+    if any(count == 0 for count in counts):
+        raise ValueError("Each configured class needs training samples")
+    inverse_roots = [1 / math.sqrt(count) for count in counts]
+    scale = len(counts) / sum(inverse_roots)
+    weights = [value * scale for value in inverse_roots]
+    return counts, weights, torch.tensor(weights, dtype=torch.float32, device=device)
+
+
 def train(config, root, output, split_path, manifest=None, fast=False, device="cpu"):
     if output.exists() and any(output.iterdir()):
         raise ValueError("Use an empty output directory to preserve previous experiment results")
@@ -117,6 +129,8 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
         )
     model = build_baseline(len(labels), config["pretrained"]).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
+    train_counts, weight_values, class_weights = training_class_weights(parts["train"], labels, device)
+    print(json.dumps({"train_class_counts": train_counts, "class_weights": weight_values}), flush=True)
     best, history = -1.0, []
     names = [DROWSINESS[state] for state in labels]
     epochs = config["fast_epochs"] if fast else config["epochs"]
@@ -132,7 +146,7 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
             if len(x) == 1 and config["image_size"] <= 32:
                 raise ValueError("Increase image size or batch size for batch normalization")
             optimizer.zero_grad(set_to_none=True)
-            loss = masked_cross_entropy(model(x), y)
+            loss = masked_cross_entropy(model(x), y, weight=class_weights)
             loss.backward()
             optimizer.step()
             valid = int((y != -1).sum())
@@ -177,6 +191,8 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
         "fast": fast,
         "device": device,
         "class_ids": labels,
+        "train_class_counts": dict(zip(names, train_counts, strict=True)),
+        "class_weights": dict(zip(names, weight_values, strict=True)),
         "source_commit": source.read_text().strip() if source.exists() else "local-unbundled",
         "python": platform.python_version(),
         "torch": torch.__version__,

@@ -1,6 +1,11 @@
 # Driver Distraction and Drowsiness Monitoring
 
 AIT DLCV project. Phase 0 scaffold only: no trained model or inference yet.
+The supplied proposal defines [project scope](docs/SCOPE.md): a lightweight shared
+CNN with six distraction classes and four drowsiness states, temporal driver alerts,
+and an event log for fleet review. Evaluation focuses on unseen drivers, glasses,
+low light, and a held-out second dataset. The eight-week plan locks scope in week 2
+and delivers a demo, generalization report, and reusable code/splits/label map.
 Read [PLAN.md](PLAN.md) before Phase 1. Public data is car-cab footage;
 **no trucking validation** is claimed. Eye crops cannot validate full-driver states.
 

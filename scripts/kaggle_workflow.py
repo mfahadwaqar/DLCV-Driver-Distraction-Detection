@@ -36,6 +36,8 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
     if task == "smoke":
         command = ["-m", "src.train.kaggle_entry", "--fast"]
     else:
+        if task == "state-farm":
+            data_root = "/kaggle/input"
         if task == "rt-bene":
             data_root = "/kaggle/temp/rt-bene/prepared"
         command = [
@@ -50,6 +52,19 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
             "--device",
             device,
         ]
+        if task == "state-farm":
+            command.extend(
+                [
+                    "--config",
+                    "configs/state_farm.yaml",
+                    "--manifest",
+                    "/kaggle/temp/state-farm/manifest.csv",
+                ]
+            )
+            command[command.index("--output") + 1] = "/kaggle/working/artifacts/state_farm"
+            command[command.index("--splits") + 1] = (
+                "/kaggle/working/artifacts/state_farm_splits.json"
+            )
         if fast:
             command.append("--fast")
         if task == "rt-bene":
@@ -62,6 +77,12 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
             "subprocess.run([sys.executable, '-m', 'src.data.rt_bene', "
             "'--source', '/kaggle/temp/rt-bene/source', '--output', "
             "'/kaggle/temp/rt-bene/prepared'], cwd=code, check=True)\n"
+        )
+    if task == "state-farm":
+        data_setup = (
+            "subprocess.run([sys.executable, '-m', 'src.data.state_farm', "
+            "'--data-root', '/kaggle/input', '--output', "
+            "'/kaggle/temp/state-farm/manifest.csv'], cwd=code, check=True)\n"
         )
     bootstrap = (
         "import base64, io, zipfile, subprocess, sys\n"
@@ -95,6 +116,8 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
     metadata["enable_internet"] = task == "rt-bene"
     if task == "rt-bene":
         metadata["competition_sources"] = []
+    if task == "state-farm":
+        metadata["competition_sources"] = ["state-farm-distracted-driver-detection"]
     (stage / "kernel-metadata.json").write_text(json.dumps(metadata, indent=2))
     (stage / "source.json").write_text(json.dumps({"commit": commit}), encoding="utf-8")
     print(f"Prepared committed source {commit} in {stage}")
@@ -124,7 +147,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["prepare", "submit", "status", "fetch-results", "pull"])
     parser.add_argument("--version", type=int, help="Saved Kaggle version to fetch")
-    parser.add_argument("--task", choices=["smoke", "phase1", "rt-bene"], default="smoke")
+    parser.add_argument(
+        "--task", choices=["smoke", "phase1", "rt-bene", "state-farm"], default="smoke"
+    )
     parser.add_argument("--data-root", help="Attached Kaggle path containing original MRL images")
     parser.add_argument("--fast", action="store_true")
     parser.add_argument("--device", choices=["cpu", "cuda"], default="cpu")

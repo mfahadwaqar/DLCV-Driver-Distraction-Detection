@@ -1,0 +1,13 @@
+seed: 42
+model: mobilenet_v3_small
+label_key: label_distraction
+class_ids: [0, 1, 2, 3, 5]
+image_size: 224
+epochs: 5
+batch_size: 32
+learning_rate: 0.001
+pretrained: false
+num_workers: 0
+split_fractions: [0.70, 0.15, 0.15]
+fast_samples_per_split: 40
+fast_epochs: 1

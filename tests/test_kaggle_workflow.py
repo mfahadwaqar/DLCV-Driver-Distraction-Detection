@@ -131,3 +131,31 @@ def test_smoke_writes_real_counts_and_no_training_claim(tmp_path):
     assert report["state_farm"]["subjects"] == 2
     assert report["training_performed"] is False
     assert (output / "environment.txt").stat().st_size > 0
+
+
+def test_state_farm_bundle_uses_competition_input_and_distraction_config(tmp_path, monkeypatch):
+    archive = io.BytesIO()
+    with zipfile.ZipFile(archive, "w") as stream:
+        stream.writestr("src/__init__.py", "")
+    monkeypatch.setattr(
+        workflow,
+        "git",
+        lambda *args: (
+            b""
+            if args[0] == "status"
+            else b"abc123"
+            if args[0] == "rev-parse"
+            else archive.getvalue()
+        ),
+    )
+    stage = tmp_path / "stage"
+    workflow.prepare(stage, task="state-farm", fast=True, device="cuda")
+    notebook = json.loads((stage / "run.ipynb").read_text())
+    code = "".join(notebook["cells"][0]["source"])
+    compile(code, "run.ipynb", "exec")
+    assert "src.data.state_farm" in code
+    assert "configs/state_farm.yaml" in code
+    assert "/kaggle/input" in code
+    metadata = json.loads((stage / "kernel-metadata.json").read_text())
+    assert metadata["competition_sources"] == ["state-farm-distracted-driver-detection"]
+    assert metadata["enable_internet"] is False

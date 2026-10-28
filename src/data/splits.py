@@ -88,7 +88,7 @@ def saved_splits(rows, path, seed=42, fractions=(0.70, 0.15, 0.15)):
     return parts
 
 
-def fast_subset(parts, max_samples=32, seed=42):
+def fast_subset(parts, max_samples=32, seed=42, label_key="label_drowsiness"):
     if max_samples < 2:
         raise ValueError("Fast subset needs at least 2 samples")
     result = {}
@@ -97,7 +97,7 @@ def fast_subset(parts, max_samples=32, seed=42):
         # Class-balanced selection for smoke runs; never reassign subjects.
         groups = {}
         for row in rows:
-            groups.setdefault(row["label_drowsiness"], []).append(row)
+            groups.setdefault(row[label_key], []).append(row)
         for group in groups.values():
             rng.shuffle(group)
         selected = []

@@ -18,7 +18,7 @@ from torchvision import transforms
 
 from src.data.manifest import load_manifest
 from src.data.mrl import ImageDataset, index_mrl
-from src.data.schema import DROWSINESS
+from src.data.schema import DISTRACTION, DROWSINESS
 from src.data.splits import assert_no_leakage, fast_subset, saved_splits
 from src.eval.metrics import classification_metrics, save_metrics
 from src.models.baseline import build_baseline
@@ -51,16 +51,17 @@ def collate_samples(batch):
     return {
         "image": torch.stack([s["image"] for s in batch]),
         "label_drowsiness": torch.tensor([s["label_drowsiness"] for s in batch]),
+        "label_distraction": torch.tensor([s["label_distraction"] for s in batch]),
     }
 
 
-def predict(model, loader, device, class_ids):
+def predict(model, loader, device, class_ids, label_key="label_drowsiness"):
     truth, predictions, probabilities = [], [], []
     model.eval()
     with torch.inference_mode():
         for batch in loader:
             probs = model(batch["image"].to(device)).softmax(1).cpu()
-            labels = encode_labels(batch["label_drowsiness"], class_ids)
+            labels = encode_labels(batch[label_key], class_ids)
             valid = labels != -1
             truth.extend(labels[valid].tolist())
             predictions.extend(probs[valid].argmax(1).tolist())
@@ -78,9 +79,9 @@ def encode_labels(labels, class_ids):
     return encoded
 
 
-def training_class_weights(rows, class_ids, device):
+def training_class_weights(rows, class_ids, device, label_key="label_drowsiness"):
     """Balance supervised classes using training subjects only."""
-    counts = [sum(r["label_drowsiness"] == state for r in rows) for state in class_ids]
+    counts = [sum(r[label_key] == state for r in rows) for state in class_ids]
     if any(count == 0 for count in counts):
         raise ValueError("Each configured class needs training samples")
     inverse_roots = [1 / math.sqrt(count) for count in counts]
@@ -92,22 +93,30 @@ def training_class_weights(rows, class_ids, device):
 def train(config, root, output, split_path, manifest=None, fast=False, device="cpu"):
     if output.exists() and any(output.iterdir()):
         raise ValueError("Use an empty output directory to preserve previous experiment results")
+    label_key = config.get("label_key", "label_drowsiness")
+    if label_key not in ("label_drowsiness", "label_distraction"):
+        raise ValueError("Unknown classification target")
+    taxonomy = DISTRACTION if label_key == "label_distraction" else DROWSINESS
     rows = load_manifest(manifest) if manifest else index_mrl(root)
     if any(r["dataset"].lower() == "dmd" for r in rows):
         raise ValueError("DMD cannot enter Phase 1 training")
     parts = saved_splits(rows, split_path, config["seed"], config["split_fractions"])
     if fast:
-        parts = fast_subset(parts, config["fast_samples_per_split"], config["seed"])
+        parts = fast_subset(parts, config["fast_samples_per_split"], config["seed"], label_key)
     assert_no_leakage(parts)
     labels = config.get("class_ids", [0, 1])
-    if len(labels) < 2 or len(set(labels)) != len(labels) or not set(labels) <= set(range(4)):
-        raise ValueError("Configure at least two distinct project class_ids in range 0..3")
-    if not ({r["label_drowsiness"] for r in rows} - {-1}) <= set(labels):
+    if (
+        len(labels) < 2
+        or len(set(labels)) != len(labels)
+        or not set(labels) <= set(range(len(taxonomy)))
+    ):
+        raise ValueError("Configure at least two distinct project class_ids in taxonomy range")
+    if not ({r[label_key] for r in rows} - {-1}) <= set(labels):
         raise ValueError("Dataset labels differ from configured class_ids")
     for split, group in parts.items():
-        support = {r["label_drowsiness"] for r in group} - {-1}
+        support = {r[label_key] for r in group} - {-1}
         if not support:
-            raise ValueError(f"No supervised drowsiness samples in {split}")
+            raise ValueError(f"No supervised samples in {split}")
         if split in ("train", "val") and support != set(labels):
             raise ValueError(
                 f"Missing class support in {split}; review subjects without test tuning"
@@ -129,10 +138,14 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
         )
     model = build_baseline(len(labels), config["pretrained"]).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
-    train_counts, weight_values, class_weights = training_class_weights(parts["train"], labels, device)
-    print(json.dumps({"train_class_counts": train_counts, "class_weights": weight_values}), flush=True)
+    train_counts, weight_values, class_weights = training_class_weights(
+        parts["train"], labels, device, label_key
+    )
+    print(
+        json.dumps({"train_class_counts": train_counts, "class_weights": weight_values}), flush=True
+    )
     best, history = -1.0, []
-    names = [DROWSINESS[state] for state in labels]
+    names = [taxonomy[state] for state in labels]
     epochs = config["fast_epochs"] if fast else config["epochs"]
     if epochs < 1:
         raise ValueError("At least one epoch required")
@@ -141,7 +154,7 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
         loss_sum, count = 0.0, 0
         for batch in loaders["train"]:
             x = batch["image"].to(device)
-            y = encode_labels(batch["label_drowsiness"], labels).to(device)
+            y = encode_labels(batch[label_key], labels).to(device)
             # MobileNet batchnorm needs >1 value per channel at the final feature map.
             if len(x) == 1 and config["image_size"] <= 32:
                 raise ValueError("Increase image size or batch size for batch normalization")
@@ -152,7 +165,7 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
             valid = int((y != -1).sum())
             loss_sum += loss.item() * valid
             count += valid
-        actual, predicted, _ = predict(model, loaders["val"], device, labels)
+        actual, predicted, _ = predict(model, loaders["val"], device, labels, label_key)
         val = classification_metrics(actual, predicted, names)
         history.append(
             {"epoch": epoch + 1, "train_loss": loss_sum / count, "val_macro_f1": val["macro_f1"]}
@@ -164,14 +177,16 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
     model.load_state_dict(torch.load(output / "best.pt", map_location=device, weights_only=True))
     reports = {}
     for split in ("val", "test"):
-        actual, predicted, probs = predict(model, loaders[split], device, labels)
+        actual, predicted, probs = predict(model, loaders[split], device, labels, label_key)
         report = classification_metrics(actual, predicted, names)
         report.update(
             {
                 "split": split,
                 "fast": fast,
                 "dataset_scope": sorted({r["dataset"] for r in rows}),
-                "task": "eye-state"
+                "task": "distraction"
+                if label_key == "label_distraction"
+                else "eye-state"
                 if {r["dataset"] for r in rows} <= {"mrl", "rt_bene"}
                 else "drowsiness",
             }
@@ -191,6 +206,8 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
         "fast": fast,
         "device": device,
         "class_ids": labels,
+        "label_key": label_key,
+        "unsupported_classes": [name for i, name in enumerate(taxonomy) if i not in labels],
         "train_class_counts": dict(zip(names, train_counts, strict=True)),
         "class_weights": dict(zip(names, weight_values, strict=True)),
         "source_commit": source.read_text().strip() if source.exists() else "local-unbundled",

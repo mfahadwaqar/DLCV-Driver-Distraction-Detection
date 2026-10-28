@@ -55,3 +55,24 @@ not a claim that YawDD/NTHU native annotation formats have been implemented.
 If MRL's official site is unavailable to you too, send an existing original archive
 location or an accessible source link retaining original subject filenames and
 stated usage terms. No 4.94 GB YawDD local download is required at this stage.
+
+## Official alternatives inspected on 2026-10-28
+
+NITYMED's official site granted access after the user approved submission of their
+AIT details. Its download page separates 720p yawning and microsleep clips by sex,
+but a selected 720p yawning link opened `ERR_BLOCKED_BY_CLIENT` in Chrome. No video
+was acquired. Clip numbers on the download page are not yet verified subject IDs;
+do not use them for subject-disjoint splitting without checking the downloaded files.
+The source page lists a CC BY 4.0 license and asks for a citation.
+
+The [official RT-BENE Zenodo record](https://zenodo.org/records/3685316) is open
+and offers 937 MB in per-subject archives, with `rt_bene_subjects.csv` and
+`s000_blink_labels.csv` through `s016_blink_labels.csv`. The subject CSV preview
+contains subject paths and evaluation fold IDs. Its labels are 0.0 for open, 1.0
+for closed/blink, and 0.5 for disagreement (discard). Subject 006 is marked
+discarded. The license is CC BY-NC-SA 4.0. Browser-mediated download stalled and
+the Chrome extension debugger subsequently detached, so no RT-BENE files were
+acquired. Once browser access is restored, retrieve the subject CSV, one label
+CSV and matching subject tar for format validation; then adapt the eye-state loader
+and run a subject-separated Kaggle baseline. RT-BENE eye patches do not cover the
+full in-car yawning or head-nodding classes.

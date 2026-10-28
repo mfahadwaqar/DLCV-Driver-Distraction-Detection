@@ -19,11 +19,12 @@ From the repository root (PowerShell):
 Commit changes first. Prepare creates an ignored notebook bundle containing only
 committed src/ and configs/ plus the source Git SHA. No GitHub token or network
 clone is needed in Kaggle. Push code to GitHub normally for backup/review.
-Submit updates the named Kaggle notebook and starts a saved CPU run. It replaces
+Submit updates the named Kaggle notebook and starts a saved CPU run by default. It replaces
 its code with the generated entry notebook. Metadata retains official State Farm
-input and private visibility. This initial entry point is an integration smoke
-check, not a training model. Training will replace/extend src/train/kaggle_entry.py
-in Phase 1. Do not interpret its metadata counts as model metrics.
+input and private visibility. The default task remains an integration smoke
+check, not a training model. Phase 1 adds `--task phase1 --data-root ACTUAL_PATH`
+and optional `--fast --device cuda` for MobileNet B2 training on acquired MRL data.
+See phase1.md. Do not interpret integration metadata counts as model metrics.
 
 The smoke run saves artifacts/smoke.json, config.json and environment.txt beneath
 /kaggle/working. Future training must save checkpoints, measured metrics and config
@@ -34,7 +35,8 @@ The embedded source commit in smoke.json identifies the exact code snapshot.
 Pull downloads notebook/metadata to .cache/kaggle-pull for inspection and never
 overwrites local source files. Model weights and raw outputs remain ignored.
 
-GPU training configuration is deferred until an actual model smoke test passes.
+For `--device cuda`, metadata enables GPU and submission requests Kaggle T4.
+Run --fast on real data first to verify the hosted package/runtime combination.
 No automatic polling or scheduled sync is installed. Fetch results after a saved
 run completes. This workflow does not upload any datasets or face images to GitHub.
 Official reference: https://github.com/Kaggle/kaggle-cli/blob/main/docs/kernels.md

@@ -3,7 +3,10 @@
 See [Kaggle workflow](docs/KAGGLE.md) for committed-code submission, run status,
 and downloading saved experiment outputs to this local repository.
 
-AIT DLCV project. Phase 0 scaffold only: no trained model or inference yet.
+AIT DLCV project. Phase 1 implementation is in progress; no real drowsiness model
+results yet. See [Phase 1 status and commands](docs/phase1.md) and
+[data handoff](docs/PHASE1_DATA.md). Unit-test fixtures are synthetic and do not
+establish detection accuracy.
 The supplied proposal defines [project scope](docs/SCOPE.md): a lightweight shared
 CNN with six distraction classes and four drowsiness states, temporal driver alerts,
 and an event log for fleet review. Evaluation focuses on unseen drivers, glasses,
@@ -19,15 +22,23 @@ powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup.ps1 -Python 'C
 .\.venv\Scripts\python.exe scripts/check.py
 .\.venv\Scripts\python.exe -m ruff check .
 ```
-Setup installs local Phase 0 dependencies and records versions in
-`docs/environment-phase0.txt`. ML extras are deferred to Phase 1 for CPU/GPU wheel
-selection and MediaPipe API verification. No global installation required.
+Setup installs local setup dependencies and records versions in
+`docs/environment-phase0.txt`. For Phase 1 tests install CPU wheels locally, then
+the extra dependencies:
+```powershell
+.\.venv\Scripts\python.exe -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cpu
+.\.venv\Scripts\python.exe -m pip install -e ".[dev,kaggle,phase1]"
+```
+Local versions are recorded in docs/environment-phase1-local.txt. Training runs
+on Kaggle; local optimizer steps are synthetic software tests only.
 GNU Make is optional: `make setup BASE_PYTHON=python`, `make test`, `make lint`.
 For Linux use `make test PYTHON=.venv/bin/python` after creating a Python 3.11 venv
 and installing `pip install -e '.[dev]'` within it.
-`make train ARGS=--fast`, `make eval`, `make demo` explicitly fail as placeholders.
-The empty-suite wrapper accepts no collection only while no test files exist.
-Docker currently runs that setup check; the demo image comes in Phase 5.
+`make train ARGS="--data-root /kaggle/input/ACTUAL-SOURCE/mrlEyes_2018_01 --device cuda --fast"`
+submits the first small B2 run once a permitted source is attached. `make eval`
+runs B1 feature evaluation (provide --features and --output via ARGS).
+`make demo` remains a Phase 5 placeholder. The Docker scaffold checks setup only;
+install the Phase 1 extra explicitly before running the expanded test suite.
 
 ## Privacy and reproducibility
 Keep datasets in ignored `data/`, outputs in `results/`, secrets in environment

@@ -9,8 +9,8 @@ test:
 lint:
 	$(PYTHON) -m ruff check .
 train:
-	$(PYTHON) scripts/pending.py train $(ARGS)
+	$(PYTHON) scripts/kaggle_workflow.py submit --task phase1 $(ARGS)
 eval:
-	$(PYTHON) scripts/pending.py eval $(ARGS)
+	$(PYTHON) -m src.eval.rules $(ARGS)
 demo:
 	$(PYTHON) scripts/pending.py demo $(ARGS)

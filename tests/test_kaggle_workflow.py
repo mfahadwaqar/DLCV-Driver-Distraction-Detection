@@ -48,6 +48,11 @@ def test_dirty_source_is_rejected(tmp_path, monkeypatch):
         workflow.prepare(tmp_path / "stage")
 
 
+def test_phase1_requires_explicit_attached_data_path(tmp_path):
+    with pytest.raises(ValueError, match="data-root"):
+        workflow.prepare(tmp_path / "stage", task="phase1")
+
+
 def test_missing_auth_is_failure_even_if_cli_returns_zero(monkeypatch):
     monkeypatch.setattr(Path, "exists", lambda path: True)
     monkeypatch.setattr(

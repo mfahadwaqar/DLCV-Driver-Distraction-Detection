@@ -1,10 +1,17 @@
 # Project plan
 
+## Reminder after initial results
+Once initial measured model results are available, email the professor regarding
+the testing dataset and request a random test sample for testing during the final
+presentation. Setup smoke tests and dataset counts do not trigger this reminder.
+Keep the professor-provided sample held out from training and tuning.
+
 ## Scope authority
 The user-supplied proposal is the project scope reference. See
 [docs/SCOPE.md](docs/SCOPE.md) for slide references, deliverables, class definitions,
 the eight-week schedule, and discrepancies. Retain compatible engineering safeguards
-from the earlier brief. No Phase 1 implementation is authorized by this scope update.
+from the earlier brief. Phase 1 was authorized by the user on 2026-10-28. Work
+locally and move training to Kaggle when real data and access are ready.
 
 Core commitments: six distraction classes and four drowsiness states from one
 lightweight shared CNN; temporal alerts and event log; unseen-driver and second-
@@ -20,7 +27,7 @@ labels and feasible experiments at the end of week 2. Calendar dates remain unkn
 ## Phase 0 and stop point
 Create a local Python 3.11 environment, Git repository, folder skeleton, YAML config,
 developer commands and version record. Run empty pytest suite and lint, then commit.
-STOP for your review of this plan before Phase 1.
+The Phase 0 review gate is satisfied; Phase 1 is now in progress.
 
 ## Assumptions and limitations
 - Training runs on Kaggle Notebooks. Local tests/demo run on CPU. Record actual
@@ -65,7 +72,7 @@ STOP for your review of this plan before Phase 1.
 Each phase ends with tests/lint, docs/phaseN.md and a Git commit. Never invent results.
 
 ## Inputs needed from you
-1. Review this plan and authorize Phase 1 after setup.
+1. Phase 1 authorized; prompt the user only for missing data/access/actions.
 2. Existing dataset locations or availability to complete access requests. Kaggle
    needs your account/competition acceptance. Keep credentials out of chat and Git.
 3. Kaggle training confirmed; notebook GPU availability and disk/download budget

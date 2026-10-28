@@ -47,6 +47,27 @@ Local CPU dependency versions are logged in environment-phase1-local.txt.
   rate/time-to-alert and unseen-driver drop are pending real-data evaluation.
   Event metrics need real annotations/negative durations; no approximation is made yet.
 
+## Verified alternative data
+
+The official RT-BENE `s012` sample was checksum-verified and prepared locally:
+935 labeled left-eye images (912 open, 23 closed/blink), with 336 disagreement
+labels excluded. It confirms the loader but contains only one subject. A private
+Kaggle run can fetch the remaining subject archives directly from Zenodo and
+check each file's official MD5/size. RT-BENE supports only the eye-state B2
+baseline; it cannot validate full drowsiness or in-car alerts.
+
+Four NITYMED videos were decoded and matched to their official yawning/microsleep
+entries. Their clip numbers do not identify subjects or event intervals, so they
+remain qualitative pipeline samples until annotations and identity mapping exist.
+
+For the RT-BENE Kaggle eye-state smoke run, from a clean committed checkout:
+```powershell
+.\.venv\Scripts\python.exe scripts/kaggle_workflow.py submit --task rt-bene --device cuda --fast
+```
+The generated private notebook enables internet only for this official download.
+After the run finishes, use `status` and `fetch-results` in the workflow script;
+review held-out subjects and class support before reporting scores.
+
 ## Commands once data are available
 Run locally to prepare acquired MRL data (replace placeholder paths):
 ```powershell

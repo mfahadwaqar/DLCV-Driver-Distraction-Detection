@@ -157,7 +157,9 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
                 "split": split,
                 "fast": fast,
                 "dataset_scope": sorted({r["dataset"] for r in rows}),
-                "task": "eye-state" if not manifest else "drowsiness",
+                "task": "eye-state"
+                if {r["dataset"] for r in rows} <= {"mrl", "rt_bene"}
+                else "drowsiness",
             }
         )
         save_metrics(report, output, split)

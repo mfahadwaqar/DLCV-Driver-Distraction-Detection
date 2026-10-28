@@ -53,6 +53,35 @@ def test_phase1_requires_explicit_attached_data_path(tmp_path):
         workflow.prepare(tmp_path / "stage", task="phase1")
 
 
+def test_rt_bene_bundle_fetches_official_data_in_private_internet_notebook(tmp_path, monkeypatch):
+    archive = io.BytesIO()
+    with zipfile.ZipFile(archive, "w") as stream:
+        stream.writestr("src/__init__.py", "")
+    monkeypatch.setattr(
+        workflow,
+        "git",
+        lambda *args: (
+            b""
+            if args[0] == "status"
+            else b"abc123\n"
+            if args[0] == "rev-parse"
+            else archive.getvalue()
+        ),
+    )
+    stage = tmp_path / "stage"
+    workflow.prepare(stage, task="rt-bene", fast=True, device="cuda")
+    notebook = json.loads((stage / "run.ipynb").read_text())
+    code = "".join(notebook["cells"][0]["source"])
+    compile(code, "run.ipynb", "exec")
+    assert "src.data.fetch_rt_bene" in code
+    assert "src.data.rt_bene" in code
+    assert "--manifest" in code
+    metadata = json.loads((stage / "kernel-metadata.json").read_text())
+    assert metadata["is_private"] is True
+    assert metadata["enable_internet"] is True
+    assert metadata["enable_gpu"] is True
+
+
 def test_missing_auth_is_failure_even_if_cli_returns_zero(monkeypatch):
     monkeypatch.setattr(Path, "exists", lambda path: True)
     monkeypatch.setattr(

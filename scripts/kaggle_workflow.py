@@ -36,6 +36,8 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
     if task == "smoke":
         command = ["-m", "src.train.kaggle_entry", "--fast"]
     else:
+        if task == "rt-bene":
+            data_root = "/kaggle/working/rt-bene/prepared"
         command = [
             "-m",
             "src.train.phase1",
@@ -50,12 +52,24 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
         ]
         if fast:
             command.append("--fast")
+        if task == "rt-bene":
+            command.extend(["--manifest", data_root + "/manifest.csv"])
+    data_setup = ""
+    if task == "rt-bene":
+        data_setup = (
+            "subprocess.run([sys.executable, '-m', 'src.data.fetch_rt_bene', "
+            "'--output', '/kaggle/working/rt-bene/source'], cwd=code, check=True)\n"
+            "subprocess.run([sys.executable, '-m', 'src.data.rt_bene', "
+            "'--source', '/kaggle/working/rt-bene/source', '--output', "
+            "'/kaggle/working/rt-bene/prepared'], cwd=code, check=True)\n"
+        )
     bootstrap = (
         "import base64, io, zipfile, subprocess, sys\n"
         "from pathlib import Path\n"
         "code = Path('/kaggle/working/project-code')\n"
         "code.mkdir(parents=True, exist_ok=True)\n"
         f"zipfile.ZipFile(io.BytesIO(base64.b64decode({payload!r}))).extractall(code)\n"
+        f"{data_setup}"
         f"subprocess.run([sys.executable, *{command!r}], cwd=code, check=True)\n"
     )
     notebook = {
@@ -78,6 +92,7 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
     shutil.copyfile(ROOT / "kaggle/kernel-metadata.json", stage / "kernel-metadata.json")
     metadata = json.loads((stage / "kernel-metadata.json").read_text())
     metadata["enable_gpu"] = device == "cuda"
+    metadata["enable_internet"] = task == "rt-bene"
     (stage / "kernel-metadata.json").write_text(json.dumps(metadata, indent=2))
     (stage / "source.json").write_text(json.dumps({"commit": commit}), encoding="utf-8")
     print(f"Prepared committed source {commit} in {stage}")
@@ -107,7 +122,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["prepare", "submit", "status", "fetch-results", "pull"])
     parser.add_argument("--version", type=int, help="Saved Kaggle version to fetch")
-    parser.add_argument("--task", choices=["smoke", "phase1"], default="smoke")
+    parser.add_argument("--task", choices=["smoke", "phase1", "rt-bene"], default="smoke")
     parser.add_argument("--data-root", help="Attached Kaggle path containing original MRL images")
     parser.add_argument("--fast", action="store_true")
     parser.add_argument("--device", choices=["cpu", "cuda"], default="cpu")

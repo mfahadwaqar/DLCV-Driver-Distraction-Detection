@@ -70,9 +70,38 @@ and offers 937 MB in per-subject archives, with `rt_bene_subjects.csv` and
 `s000_blink_labels.csv` through `s016_blink_labels.csv`. The subject CSV preview
 contains subject paths and evaluation fold IDs. Its labels are 0.0 for open, 1.0
 for closed/blink, and 0.5 for disagreement (discard). Subject 006 is marked
-discarded. The license is CC BY-NC-SA 4.0. Browser-mediated download stalled and
-the Chrome extension debugger subsequently detached, so no RT-BENE files were
-acquired. Once browser access is restored, retrieve the subject CSV, one label
-CSV and matching subject tar for format validation; then adapt the eye-state loader
-and run a subject-separated Kaggle baseline. RT-BENE eye patches do not cover the
+discarded. The license is CC BY-NC-SA 4.0. RT-BENE eye patches do not cover the
 full in-car yawning or head-nodding classes.
+
+## Acquired inspection samples
+
+The user supplied the official RT-BENE subject table, `s012` labels and tar.
+Their MD5 hashes match the official Zenodo record. The tar has 1,271 left-eye and
+1,271 right-eye images with matching frame numbers. Only left-eye filenames are
+explicitly listed in the label CSV. The loader therefore uses left-eye images only,
+excludes `0.5` disagreements, and produced 935 supervised samples (912 open,
+23 closed/blink) from `s012`. All 336 disagreements were excluded. This is one
+subject, so it is an adapter check, not a train/validation/test experiment.
+
+Four NITYMED MP4s are present and readable. Their original official download IDs
+from the saved file provenance map as follows:
+
+| Local file | Official entry | Duration | Resolution |
+|---|---|---:|---:|
+| P1043127_720.mp4 | MALE_HDTV720_2 (yawning) | 18.82 s | 1280x720 |
+| P1042790_na.mp4 | FEMALE_FULL_5 (yawning) | 40.80 s | 1920x1080 |
+| P1042757_na.mp4 | MALE_MICRO_3 (microsleep) | 145.60 s | 1920x1080 |
+| P1043068_na.mp4 | FEMALE_MICRO_4 (microsleep) | 146.60 s | 1920x1080 |
+
+The 720p yawning clip unexpectedly has an audio stream even though the source
+description says videos are mute. Face Landmarker produced EAR/MAR/pitch on four
+sampled frames of that clip. Clip names and official entry numbers do not prove
+participant identity or frame-level event timing, so no B1 outcome is reported.
+An incomplete `.crdownload` was present initially and was ignored; it later
+disappeared after the final video arrived.
+
+For the first B2 eye-state run, the private Kaggle notebook can fetch the full
+RT-BENE record directly from official Zenodo with internet enabled. Each file is
+checked against Zenodo's declared size and MD5 before preparation. This avoids a
+large local archive and does not rehost images publicly. The notebook still needs
+a successful real Kaggle run before any model result is claimed.

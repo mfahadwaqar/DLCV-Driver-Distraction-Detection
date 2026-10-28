@@ -34,6 +34,26 @@ higher closed-eye share than validation, and this is one run with one split and
 seed. Avoid presenting 97.7% accuracy as the primary result because open eyes
 dominate. The relevant result is the class-specific recall and macro F1.
 
+## Error analysis by held-out subject
+
+The saved prediction rows were matched to the saved test split in order, with
+labels checked for agreement. The analysis can be reproduced with
+`scripts/analyze_rt_bene_errors.py`; its per-subject CSV and ranked false
+negative/positive frame lists are in the ignored local `error_analysis/` folder
+beside the downloaded run artifacts.
+
+| Subject | Closed images | Missed closed | Closed recall | Open false alarms |
+| --- | ---: | ---: | ---: | ---: |
+| s000 | 931 | 249 | 73.3% | 6 |
+| s003 | 167 | 18 | 89.2% | 81 |
+| s012 | 23 | 17 | 26.1% | 16 |
+
+s000 contributes 249 of the 284 missed closed-eye images. s012 has the lowest
+closed-eye recall, but only 23 positive samples, so the estimate is less stable.
+s003 has most false alarms (81 of 103). These numbers flag subjects to inspect;
+they do not explain why errors occur. The prepared samples have no glasses or
+lighting condition labels, so this run cannot support those subgroup claims.
+
 Artifacts include `best.pt`, `summary.json`, `history.json`, split manifests,
 per-split predictions, confusion matrices, configuration and environment. The
 downloaded checkpoint loaded locally, all 17,005 test predictions were present,

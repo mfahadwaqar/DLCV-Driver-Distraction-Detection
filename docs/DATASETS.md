@@ -1,13 +1,16 @@
 # Dataset sources and access status
 
-Checked 2026-10-28. No files downloaded, authenticated access tested, or data uploaded.
+Checked 2026-10-28. RT-BENE was fetched and trained on Kaggle, and the small
+State Farm driver/class CSV was downloaded locally for inspection. Raw State Farm
+images were not downloaded locally or uploaded to GitHub.
 Training platform: Kaggle Notebooks. Use original subject metadata, not random
 pre-split mirrors. Dataset availability does not itself establish permission to
 upload it to Kaggle, even privately.
 
 | Dataset | Official source | Use | Verified status / next step |
 | --- | --- | --- | --- |
-| State Farm | https://www.kaggle.com/competitions/state-farm-distracted-driver-detection/data | Distraction; labeled train images only | Official listing found, subject to competition rules. User login/required rule acceptance and authenticated file access remain to be checked. Preserve driver_imgs_list.csv. |
+| RT-BENE | https://zenodo.org/records/3685316 | Eye-open/closed baseline only | Official archives checksum-verified on Kaggle; 16 subjects and 107,350 labeled eye images prepared. Full training completed; see [results](RT_BENE_RESULTS.md). |
+| State Farm | https://www.kaggle.com/competitions/state-farm-distracted-driver-detection/data | Distraction; labeled train images only | Authenticated access verified. `driver_imgs_list.csv` has 22,424 labeled images, 26 drivers and 10 source classes. Preserve it for driver-wise splits. Raw images can stay as Kaggle competition input. |
 | MRL Eye | https://mrl.cs.vsb.cz/eyedataset | Eye-open/closed baseline, glasses/lighting subsets | Official page timed out. Author paper confirms subject metadata; current download, license and exact filename format remain unverified. |
 | YawDD | https://doi.org/10.21227/e1qm-hb90 | Full-face yawning footage | Official IEEE DataPort search record says free IEEE login required, membership unnecessary. Direct DOI fetch blocked by crawler rules. Terms, size, identities and event annotations still need inspection after login. |
 | NTHU-DDD | https://cv.cs.nthu.edu.tw/php/callforpaper/datasets/DDD/ | Candidate full-face temporal drowsiness data | Official endpoint timed out; index returned gateway error. Current agreement/form, licensing and download process could not be verified. |
@@ -30,7 +33,8 @@ https://www.vicomtech.org/en/news/detail/562_vicomtech-develops-the-driver-monit
 - Keep original subject IDs, archive checksums, source versions and saved split files.
 - Configure notebook input paths; save checkpoints/metrics/config/version logs as
   run outputs. Record the actual GPU/runtime, without assuming GPU quotas or versions.
-- Ask before downloads over 5 GB. No download/upload has happened in this task.
+- Ask before downloads over 5 GB. The local State Farm CSV is about 0.5 MB; the
+  larger RT-BENE files were fetched inside Kaggle for the completed run.
 - If access is pending, build clearly labeled mock loaders.
 
 ## Coverage gaps

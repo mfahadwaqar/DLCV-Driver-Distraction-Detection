@@ -27,7 +27,7 @@ def test_prepare_excludes_disagreement_and_unlabeled_right_eye(tmp_path):
         )
     with tarfile.open(source / "s012_noglasses_eyes.tar", "w") as archive:
         for side in ("left", "right"):
-            for number in (1, 2, 3):
+            for number in (1, 2, 3, 4):
                 name = f"s012_noglasses/natural/{side}/{side}_{number:06d}_rgb.png"
                 payload = b"sample"
                 info = tarfile.TarInfo(name)

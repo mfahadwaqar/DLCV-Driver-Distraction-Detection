@@ -59,8 +59,10 @@ def prepare_subject(source, output, subject, info):
             if not member.isfile() or not member.name.startswith(expected_prefix):
                 continue
             name = member.name[len(expected_prefix) :]
-            if name not in labels or name in found:
-                raise ValueError(f"Unexpected or duplicate left-eye image: {member.name}")
+            if name not in labels:
+                continue  # Some official archives contain images absent from the label CSV.
+            if name in found:
+                raise ValueError(f"Duplicate labeled left-eye image: {member.name}")
             found.add(name)
             label = labels[name]
             if label == "0.5":

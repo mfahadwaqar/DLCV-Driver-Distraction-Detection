@@ -1,10 +1,9 @@
 # Project plan
 
 ## Reminder after initial results
-Once initial measured model results are available, email the professor regarding
-the testing dataset and request a random test sample for testing during the final
-presentation. Setup smoke tests and dataset counts do not trigger this reminder.
-Keep the professor-provided sample held out from training and tuning.
+When the complete system is ready, prepare a held-out data sample to share with
+the professor for testing during the final presentation. The student supplies
+the sample to the professor. Keep it out of training and tuning.
 
 ## Scope authority
 The user-supplied proposal is the project scope reference. See

@@ -60,6 +60,6 @@ downloaded checkpoint loaded locally, all 17,005 test predictions were present,
 and saved train/validation/test subject sets were disjoint.
 
 Next: inspect errors by subject and lighting/glasses where metadata permits,
-then build and evaluate the distraction baseline on a separate dataset. Request
-an unseen final-presentation test sample from the professor now that the project
-has its first real result.
+then build and evaluate the distraction baseline on a separate dataset. When the
+complete system is ready, prepare a held-out sample for the student to share
+with the professor for testing during the final presentation.

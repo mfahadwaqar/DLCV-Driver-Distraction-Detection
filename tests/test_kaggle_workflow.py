@@ -48,21 +48,47 @@ def test_dirty_source_is_rejected(tmp_path, monkeypatch):
         workflow.prepare(tmp_path / "stage")
 
 
+def test_missing_auth_is_failure_even_if_cli_returns_zero(monkeypatch):
+    monkeypatch.setattr(Path, "exists", lambda path: True)
+    monkeypatch.setattr(
+        subprocess,
+        "run",
+        lambda *a, **kw: subprocess.CompletedProcess(
+            a, 0, "Authentication required to call the Kaggle API.", ""
+        ),
+    )
+    with pytest.raises(RuntimeError, match="local sign-in"):
+        workflow.cli("kernels", "status", "owner/notebook")
+
+
 def test_smoke_writes_real_counts_and_no_training_claim(tmp_path):
     input_root = tmp_path / "input"
     data = input_root / "competitions" / "state-farm"
     data.mkdir(parents=True)
     with (data / "driver_imgs_list.csv").open("w", newline="") as stream:
         writer = csv.writer(stream)
-        writer.writerows([
-            ["subject", "classname", "img"],
-            ["p1", "c0", "a.jpg"], ["p2", "c1", "b.jpg"],
-        ])
+        writer.writerows(
+            [
+                ["subject", "classname", "img"],
+                ["p1", "c0", "a.jpg"],
+                ["p2", "c1", "b.jpg"],
+            ]
+        )
     output = tmp_path / "artifacts"
-    subprocess.run([
-        sys.executable, "-m", "src.train.kaggle_entry", "--fast",
-        "--input", str(input_root), "--output", str(output),
-    ], check=True, cwd=Path(__file__).resolve().parents[1])
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "src.train.kaggle_entry",
+            "--fast",
+            "--input",
+            str(input_root),
+            "--output",
+            str(output),
+        ],
+        check=True,
+        cwd=Path(__file__).resolve().parents[1],
+    )
     report = json.loads((output / "smoke.json").read_text())
     assert report["state_farm"]["rows"] == 2
     assert report["state_farm"]["subjects"] == 2

@@ -70,7 +70,7 @@ def cli(*args):
     if not executable.exists():
         raise RuntimeError("Install the local integration extra: pip install -e '.[dev,kaggle]'")
     result = subprocess.run(
-        [str(executable), *args], cwd=ROOT, capture_output=True, text=True, check=True
+        [str(executable), *args], cwd=ROOT, capture_output=True, text=True
     )
     # Kaggle 2.2.5 can print missing-auth guidance and still return exit code 0.
     if "Authentication required to call the Kaggle API" in result.stdout + result.stderr:
@@ -78,6 +78,8 @@ def cli(*args):
     print(result.stdout, end="")
     if result.stderr:
         print(result.stderr, end="", file=sys.stderr)
+    if result.returncode:
+        raise RuntimeError(f"Kaggle command failed (exit {result.returncode}); see message above.")
     if "Next page token:" in result.stdout:
         raise RuntimeError("Output has more pages; download is incomplete. Use Kaggle pagination.")
 

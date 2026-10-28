@@ -3,8 +3,9 @@
 See [Kaggle workflow](docs/KAGGLE.md) for committed-code submission, run status,
 and downloading saved experiment outputs to this local repository.
 
-AIT DLCV project. Phase 1 implementation is in progress; no real drowsiness model
-results yet. See [Phase 1 status and commands](docs/phase1.md) and
+AIT DLCV project. A first real-data RT-BENE **eye-state** baseline is complete;
+the full distraction and drowsiness system is still in progress. See the
+[RT-BENE result](docs/RT_BENE_RESULTS.md), [Phase 1 status and commands](docs/phase1.md), and
 [data handoff](docs/PHASE1_DATA.md). Unit-test fixtures are synthetic and do not
 establish detection accuracy.
 The supplied proposal defines [project scope](docs/SCOPE.md): a lightweight shared
@@ -43,8 +44,8 @@ install the Phase 1 extra explicitly before running the expanded test suite.
 ## Privacy and reproducibility
 Keep datasets in ignored `data/`, outputs in `results/`, secrets in environment
 variables. Never commit face imagery or credentials. Fixed seeds, saved subject
-splits, YAML configs and logged package versions are required. Dataset access has
-not been verified; see [dataset register](docs/DATASETS.md).
+splits, YAML configs and logged package versions are required. RT-BENE access
+has been verified; other dataset access varies. See [dataset register](docs/DATASETS.md).
 
 Training will run on Kaggle Notebooks. Local development and CPU tests/demo stay
 in this repository. Record actual notebook runtime/package/GPU versions per run.

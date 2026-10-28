@@ -1,8 +1,9 @@
-# Phase 1 — implementation checkpoint, evaluation pending
+# Phase 1 — first eye-state result, broader evaluation pending
 
-Started 2026-10-28 with user authorization. This phase is **not complete** until
-real-data baselines have been trained/evaluated on held-out subjects, or the user
-approves a documented scope reduction. No real drowsiness performance is claimed.
+Started 2026-10-28 with user authorization. A real RT-BENE eye-state baseline now
+has held-out subject results; see [the measured run](RT_BENE_RESULTS.md). Phase 1
+remains incomplete for distraction, yawning, microsleep and full driver-state
+evaluation. Eye-state accuracy is not a measured drowsiness-alert result.
 
 ## Implemented locally
 - Strict candidate MRL filename parser, common image schema and explicit manifest

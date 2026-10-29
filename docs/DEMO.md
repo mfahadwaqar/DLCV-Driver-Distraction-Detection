@@ -42,5 +42,10 @@ RT-BENE checkpoint loaded and produced a valid binary prediction locally. A
 three-frame blank video completed with the official MediaPipe asset, actual
 RT-BENE weights and artificial distraction weights; both alerts stayed unknown.
 This checks loading, video handling and event logging only. Real combined video
-validation requires the completed distraction checkpoint and representative
-driver footage; it has not been performed.
+validation on representative driver footage has not been performed.
+
+After the full State Farm artifact arrived, both actual baseline checkpoints
+were loaded and checked on the same blank video. The no-face path produced no
+alerts and completed the event log. Separate artificial-input forward passes
+check each classifier's output mapping. These are software checks, not evidence
+of driver-video accuracy; representative video validation remains pending.

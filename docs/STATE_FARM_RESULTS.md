@@ -60,6 +60,6 @@ Each experiment directory contains `summary.json`, `val.json`, `test.json`, `his
 
 ## Readable notebook publication
 
-The updated generator uses visible setup/data/split/training/results cells, a public GitHub checkout pinned to the committed SHA, and the exact baseline rows as plain Python data. It contains no encoded/compressed payloads or hidden source cells. All nine workflow tests and Ruff checks passed; full saved split restoration was verified locally.
+The updated generator uses visible setup/data/split/training/results cells, a public GitHub checkout pinned to the committed SHA, and the saved driver-to-split assignments as plain Python data. It reconstructs canonically sorted rows from the prepared manifest and checks the original baseline fingerprint and driver identities before training. It contains no encoded/compressed payloads or hidden source cells. All nine workflow tests and Ruff checks passed; full saved split restoration was verified locally using the real manifest loader on a shuffled CSV with all 22,424 saved rows. The compact notebook is approximately 8 KB.
 
 The installed Kaggle CLI supports `kernels push -p FOLDER --no-run`: it saves a new notebook version without executing any cell. This can publish the readable source after committing/pushing the pinned code and preparing the notebook. It does not create fresh training outputs; measured results remain those of completed version 4. No publication or rerun was performed during this verification.

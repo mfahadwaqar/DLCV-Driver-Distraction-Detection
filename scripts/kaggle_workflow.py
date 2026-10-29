@@ -118,11 +118,45 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
     split_setup = ""
     if task == "state-farm-pretrained":
         split_document = load_baseline_splits()
-        # Keep every saved row and its order as a readable Python literal.
-        split_rows = pprint.pformat(split_document, width=100, sort_dicts=False)
+        from src.data.splits import assert_no_leakage, fingerprint
+
+        parts = split_document["splits"]
+        assert_no_leakage(parts)
+        if fingerprint([row for rows in parts.values() for row in rows]) != split_document[
+            "fingerprint"
+        ]:
+            raise ValueError("Baseline split fingerprint does not match its rows")
+        for rows in parts.values():
+            if rows != sorted(rows, key=lambda row: (row["dataset"], row["path"])):
+                raise ValueError("Baseline split rows must have canonical ordering")
+        plan = {
+            key: split_document[key] for key in ("seed", "fractions", "fingerprint")
+        }
+        plan["subjects"] = {
+            name: sorted({row["subject_id"] for row in rows})
+            for name, rows in parts.items()
+        }
+        split_plan = pprint.pformat(plan, width=100, sort_dicts=False)
         split_setup = (
-            "import json\n"
-            f"baseline = {split_rows}\n"
+            "import json\nimport sys\n"
+            "sys.path.insert(0, str(code))\n"
+            "from src.data.manifest import load_manifest\n"
+            "from src.data.splits import assert_no_leakage, fingerprint\n\n"
+            "# Original saved driver assignments, in plain text.\n"
+            f"split_plan = {split_plan}\n"
+            "rows = load_manifest('/kaggle/temp/state-farm/manifest.csv')\n"
+            "assert fingerprint(rows) == split_plan['fingerprint'], 'Baseline data changed'\n"
+            "assignment = {subject: name for name, subjects in split_plan['subjects'].items() "
+            "for subject in subjects}\n"
+            "assert {row['subject_id'] for row in rows} == set(assignment), "
+            "'Baseline drivers changed'\n"
+            "parts = {name: sorted([row for row in rows "
+            "if assignment[row['subject_id']] == name], "
+            "key=lambda row: (row['dataset'], row['path'])) "
+            "for name in split_plan['subjects']}\n"
+            "assert_no_leakage(parts)\n"
+            "baseline = {key: split_plan[key] for key in ('seed', 'fractions', 'fingerprint')}\n"
+            "baseline['splits'] = parts\n"
             "split_path = Path('/kaggle/temp/state-farm/baseline_splits.json')\n"
             "split_path.parent.mkdir(parents=True, exist_ok=True)\n"
             "split_path.write_text(json.dumps(baseline, indent=2), encoding='utf-8')\n"

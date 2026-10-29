@@ -7,6 +7,7 @@ from pathlib import Path
 import pytest
 
 from scripts import kaggle_workflow as workflow
+from src.data.splits import fingerprint
 
 
 def notebook_code(notebook):
@@ -194,7 +195,7 @@ def test_pretrained_state_farm_bundles_saved_splits_and_enables_internet(tmp_pat
         "splits": {
             name: [
                 {
-                    "path": "state-farm-distracted-driver-detection/imgs/train/c0/a.jpg",
+                    "path": f"state-farm-distracted-driver-detection/imgs/train/c0/{name}.jpg",
                     "subject_id": f"state_farm:state_farm:{name}",
                     "dataset": "state_farm",
                     "label_distraction": 0,
@@ -205,6 +206,9 @@ def test_pretrained_state_farm_bundles_saved_splits_and_enables_internet(tmp_pat
             for name in ("train", "val", "test")
         },
     }
+    baseline["fingerprint"] = fingerprint(
+        [row for rows in baseline["splits"].values() for row in rows]
+    )
     baseline_path = tmp_path / "state_farm_splits.json"
     baseline_path.write_text(json.dumps(baseline), encoding="utf-8")
     monkeypatch.setattr(workflow, "BASELINE_SPLITS", baseline_path)
@@ -234,8 +238,17 @@ def test_pretrained_state_farm_bundles_saved_splits_and_enables_internet(tmp_pat
     split_cell = split_cell.replace(
         "/kaggle/temp/state-farm/baseline_splits.json", restored_path.as_posix()
     )
-    exec(compile(split_cell, "restore-splits", "exec"), {})
+    from src.data import manifest
+
+    rows = [row for rows in baseline["splits"].values() for row in rows]
+    monkeypatch.setattr(manifest, "load_manifest", lambda path: list(reversed(rows)))
+    exec(compile(split_cell, "restore-splits", "exec"), {"code": workflow.ROOT})
     assert json.loads(restored_path.read_text()) == baseline
+    assert (stage / "run.ipynb").stat().st_size < 20000
+    # Changed manifest contents must stop restoration before training.
+    monkeypatch.setattr(manifest, "load_manifest", lambda path: rows[:-1])
+    with pytest.raises(AssertionError, match="Baseline data changed"):
+        exec(compile(split_cell, "restore-splits", "exec"), {"code": workflow.ROOT})
 
 
 

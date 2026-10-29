@@ -8,11 +8,41 @@ import shutil
 import subprocess
 import sys
 import zipfile
+import zlib
 from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 STAGE = ROOT / ".cache" / "kaggle-submit"
+BASELINE_SPLITS = ROOT / "results/kaggle/20261029T065436396085Z/artifacts/state_farm_splits.json"
+
+
+def load_baseline_splits(path=None):
+    """Load only the expected public State Farm split JSON, never arbitrary files."""
+    path = BASELINE_SPLITS if path is None else path
+    document = json.loads(Path(path).read_text(encoding="utf-8"))
+    if set(document) != {"seed", "fractions", "fingerprint", "splits"}:
+        raise ValueError("Unexpected baseline split document fields")
+    if document["seed"] != 42 or document["fractions"] != [0.7, 0.15, 0.15]:
+        raise ValueError("Baseline split parameters do not match the saved experiment")
+    if set(document["splits"]) != {"train", "val", "test"}:
+        raise ValueError("Baseline splits must contain train, val, and test")
+    for rows in document["splits"].values():
+        if not isinstance(rows, list):
+            raise ValueError("Each baseline split must be a list")
+        for row in rows:
+            if set(row) != {
+                "path", "subject_id", "dataset", "label_distraction",
+                "label_drowsiness", "metadata",
+            }:
+                raise ValueError("Unexpected fields in baseline split row")
+            if not row["path"].startswith(
+                "state-farm-distracted-driver-detection/imgs/train/"
+            ):
+                raise ValueError("Baseline split contains a path outside State Farm")
+            if row["dataset"] != "state_farm" or set(row["metadata"]) != {"source_class"}:
+                raise ValueError("Unexpected baseline split metadata")
+    return document
 
 
 def git(*args):
@@ -26,7 +56,10 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
         raise RuntimeError("Commit changes first: runs must use a clean committed snapshot.")
     commit = git("rev-parse", "HEAD").decode().strip()
     # Explicit allowlist: never bundle data, credentials, results, or .git.
-    archive = git("archive", "--format=zip", "HEAD", "src", "configs")
+    archive_paths = ["src", "configs"]
+    if task == "state-farm-pretrained":
+        archive_paths = ["src", "configs/state_farm_pretrained.yaml"]
+    archive = git("archive", "--format=zip", "HEAD", *archive_paths)
     bundle = io.BytesIO()
     with zipfile.ZipFile(io.BytesIO(archive)) as incoming, zipfile.ZipFile(bundle, "w") as out:
         for item in incoming.infolist():
@@ -36,7 +69,7 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
     if task == "smoke":
         command = ["-m", "src.train.kaggle_entry", "--fast"]
     else:
-        if task == "state-farm":
+        if task in ("state-farm", "state-farm-pretrained"):
             data_root = "/kaggle/input"
         if task == "rt-bene":
             data_root = "/kaggle/temp/rt-bene/prepared"
@@ -52,16 +85,27 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
             "--device",
             device,
         ]
-        if task == "state-farm":
+        if task in ("state-farm", "state-farm-pretrained"):
+            config_path = (
+                "configs/state_farm_pretrained.yaml"
+                if task == "state-farm-pretrained"
+                else "configs/state_farm.yaml"
+            )
             command.extend(
                 [
-                    "--config",
-                    "configs/state_farm.yaml",
+                    "--config", config_path,
                     "--manifest",
                     "/kaggle/temp/state-farm/manifest.csv",
                 ]
             )
-            command[command.index("--output") + 1] = "/kaggle/working/artifacts/state_farm"
+            output_name = (
+                "state_farm_pretrained"
+                if task == "state-farm-pretrained"
+                else "state_farm"
+            )
+            command[command.index("--output") + 1] = (
+                f"/kaggle/working/artifacts/{output_name}"
+            )
             command[command.index("--splits") + 1] = (
                 "/kaggle/working/artifacts/state_farm_splits.json"
             )
@@ -78,12 +122,24 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
             "'--source', '/kaggle/temp/rt-bene/source', '--output', "
             "'/kaggle/temp/rt-bene/prepared'], cwd=code, check=True)\n"
         )
-    if task == "state-farm":
+    if task in ("state-farm", "state-farm-pretrained"):
         data_setup = (
             "subprocess.run([sys.executable, '-m', 'src.data.state_farm', "
             "'--data-root', '/kaggle/input', '--output', "
             "'/kaggle/temp/state-farm/manifest.csv'], cwd=code, check=True)\n"
         )
+    if task == "state-farm-pretrained":
+        split_document = load_baseline_splits()
+        split_payload = base64.b64encode(
+            zlib.compress(json.dumps(split_document, separators=(",", ":")).encode("utf-8"))
+        ).decode("ascii")
+        data_setup += (
+            "import zlib\n"
+            "split_path = Path('/kaggle/temp/state-farm/baseline_splits.json')\n"
+            "split_path.parent.mkdir(parents=True, exist_ok=True)\n"
+            f"split_path.write_bytes(zlib.decompress(base64.b64decode({split_payload!r})))\n"
+        )
+        command[command.index("--splits") + 1] = "/kaggle/temp/state-farm/baseline_splits.json"
     bootstrap = (
         "import base64, io, zipfile, subprocess, sys\n"
         "from pathlib import Path\n"
@@ -113,10 +169,10 @@ def prepare(stage=STAGE, task="smoke", data_root=None, fast=False, device="cpu")
     shutil.copyfile(ROOT / "kaggle/kernel-metadata.json", stage / "kernel-metadata.json")
     metadata = json.loads((stage / "kernel-metadata.json").read_text())
     metadata["enable_gpu"] = device == "cuda"
-    metadata["enable_internet"] = task == "rt-bene"
+    metadata["enable_internet"] = task in ("rt-bene", "state-farm-pretrained")
     if task == "rt-bene":
         metadata["competition_sources"] = []
-    if task == "state-farm":
+    if task in ("state-farm", "state-farm-pretrained"):
         metadata["competition_sources"] = ["state-farm-distracted-driver-detection"]
     (stage / "kernel-metadata.json").write_text(json.dumps(metadata, indent=2))
     (stage / "source.json").write_text(json.dumps({"commit": commit}), encoding="utf-8")
@@ -148,7 +204,9 @@ def main():
     parser.add_argument("action", choices=["prepare", "submit", "status", "fetch-results", "pull"])
     parser.add_argument("--version", type=int, help="Saved Kaggle version to fetch")
     parser.add_argument(
-        "--task", choices=["smoke", "phase1", "rt-bene", "state-farm"], default="smoke"
+        "--task",
+        choices=["smoke", "phase1", "rt-bene", "state-farm", "state-farm-pretrained"],
+        default="smoke",
     )
     parser.add_argument("--data-root", help="Attached Kaggle path containing original MRL images")
     parser.add_argument("--fast", action="store_true")

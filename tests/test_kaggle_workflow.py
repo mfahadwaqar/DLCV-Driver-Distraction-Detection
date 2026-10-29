@@ -5,6 +5,7 @@ import json
 import subprocess
 import sys
 import zipfile
+import zlib
 from pathlib import Path
 
 import pytest
@@ -159,3 +160,68 @@ def test_state_farm_bundle_uses_competition_input_and_distraction_config(tmp_pat
     metadata = json.loads((stage / "kernel-metadata.json").read_text())
     assert metadata["competition_sources"] == ["state-farm-distracted-driver-detection"]
     assert metadata["enable_internet"] is False
+
+
+def test_pretrained_state_farm_bundles_saved_splits_and_enables_internet(tmp_path, monkeypatch):
+    archive = io.BytesIO()
+    with zipfile.ZipFile(archive, "w") as stream:
+        stream.writestr("src/__init__.py", "")
+        stream.writestr("configs/state_farm_pretrained.yaml", "pretrained: true\n")
+    monkeypatch.setattr(
+        workflow,
+        "git",
+        lambda *args: (
+            b""
+            if args[0] == "status"
+            else b"abc123\n"
+            if args[0] == "rev-parse"
+            else archive.getvalue()
+        ),
+    )
+    baseline = {
+        "seed": 42,
+        "fractions": [0.7, 0.15, 0.15],
+        "fingerprint": "baseline",
+        "splits": {
+            name: [
+                {
+                    "path": "state-farm-distracted-driver-detection/imgs/train/c0/a.jpg",
+                    "subject_id": f"state_farm:state_farm:{name}",
+                    "dataset": "state_farm",
+                    "label_distraction": 0,
+                    "label_drowsiness": -1,
+                    "metadata": {"source_class": "c0"},
+                }
+            ]
+            for name in ("train", "val", "test")
+        },
+    }
+    baseline_path = tmp_path / "state_farm_splits.json"
+    baseline_path.write_text(json.dumps(baseline), encoding="utf-8")
+    monkeypatch.setattr(workflow, "BASELINE_SPLITS", baseline_path)
+
+    stage = tmp_path / "stage"
+    workflow.prepare(stage, task="state-farm-pretrained", device="cuda")
+    notebook = json.loads((stage / "run.ipynb").read_text())
+    code = "".join(notebook["cells"][0]["source"])
+    compile(code, "run.ipynb", "exec")
+    assert "configs/state_farm_pretrained.yaml" in code
+    assert "baseline_splits.json" in code
+    assert "/kaggle/working/artifacts/state_farm_pretrained" in code
+    metadata = json.loads((stage / "kernel-metadata.json").read_text())
+    assert metadata["enable_internet"] is True
+    assert metadata["enable_gpu"] is True
+
+    b64 = code.split("split_path.write_bytes(zlib.decompress(base64.b64decode(")[1].split(")")[0]
+    embedded = json.loads(zlib.decompress(base64.b64decode(b64.strip("'"))))
+    assert embedded == baseline
+    assert embedded["splits"]["train"][0]["path"].startswith(
+        "state-farm-distracted-driver-detection/"
+    )
+
+
+def test_baseline_split_loader_rejects_arbitrary_fields(tmp_path):
+    path = tmp_path / "splits.json"
+    path.write_text(json.dumps({"secret": "not allowed"}), encoding="utf-8")
+    with pytest.raises(ValueError, match="Unexpected baseline split document fields"):
+        workflow.load_baseline_splits(path)

@@ -1,6 +1,7 @@
 import numpy as np
 import pytest
 
+import src.demo.run as demo
 from src.demo.run import Classifier, Persistence, eye_bounds
 
 
@@ -30,3 +31,33 @@ def test_checkpoint_task_mismatch_fails_before_loading_weights(tmp_path):
     (tmp_path / "config.yaml").write_text("label_key: label_distraction\nclass_ids: [0, 1]\n")
     with pytest.raises(ValueError, match="Wrong checkpoint task"):
         Classifier(tmp_path, "label_drowsiness")
+
+
+def test_pretrained_checkpoint_load_does_not_download_weights_for_inference(tmp_path, monkeypatch):
+    (tmp_path / "config.yaml").write_text(
+        "label_key: label_distraction\n"
+        "class_ids: [0, 1, 2, 3, 5]\n"
+        "model: mobilenet_v3_small\n"
+        "image_size: 224\n"
+        "pretrained: true\n"
+    )
+
+    class FakeModel:
+        def to(self, device):
+            return self
+
+        def eval(self):
+            return self
+
+        def load_state_dict(self, state):
+            pass
+
+    calls = []
+    monkeypatch.setattr(
+        demo, "build_baseline", lambda classes, pretrained: calls.append(pretrained) or FakeModel()
+    )
+    monkeypatch.setattr(demo.torch, "load", lambda *args, **kwargs: {})
+
+    Classifier(tmp_path, "label_distraction")
+
+    assert calls == [False]

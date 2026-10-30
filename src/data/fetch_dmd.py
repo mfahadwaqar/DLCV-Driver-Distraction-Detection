@@ -40,7 +40,17 @@ class NoRedirect(urllib.request.HTTPRedirectHandler):
 def parse_urls(secret):
     """Accept newline-separated URLs; permit only the four exact provider paths."""
     selected = {}
-    for raw in secret.splitlines():
+    try:
+        links = (
+            json.loads(secret) if secret.lstrip().startswith("[")
+            else secret.replace("https://datasets.vicomtech.org/", "\nhttps://datasets.vicomtech.org/")
+            .splitlines()
+        )
+        if not isinstance(links, list) or not all(isinstance(link, str) for link in links):
+            raise ValueError
+    except (ValueError, TypeError):
+        raise IntakeError("Secret must contain a JSON list of archive links.") from None
+    for raw in links:
         url = raw.strip()
         if not url:
             continue

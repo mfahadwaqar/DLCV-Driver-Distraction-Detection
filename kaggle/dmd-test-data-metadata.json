@@ -1,0 +1,13 @@
+{
+  "id": "mfahadwaqar2002/dlcv-dmd-external-test-data",
+  "title": "DLCV - DMD External Test Data",
+  "code_file": "kaggle_dmd_test_data.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": false,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": []
+}

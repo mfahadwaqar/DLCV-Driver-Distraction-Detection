@@ -3,6 +3,17 @@
 Verified 2026-10-29 against official sources. No video download, form submission,
 email, purchase, training, split change, or model evaluation was performed here.
 
+## Access update: 2026-10-30
+
+The user's AIT inbox contains access emails for all three DMD packages. The
+signed drowsiness README opened in Chrome and describes frame intervals for
+eye states, blinking and yawning (with/without a hand), with participant/session
+structure and OpenLABEL JSON. Activities were acted. This verifies documented
+coverage; actual participant archive annotation completeness remains unchecked.
+The emailed links specify a 48-hour validity. Signed access URLs are not stored
+in this repository. Browser archive-download attempts timed out; no completed
+archive download was verified. Local intake folder: `data/dmd/incoming/` (ignored).
+
 ## Recommended order
 
 Keep **DMD as the primary external test dataset**, as required by SCOPE.md.

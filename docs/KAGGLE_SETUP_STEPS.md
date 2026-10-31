@@ -13,6 +13,11 @@ The packages are in the project's `.cache/kaggle_setup/` folder:
 | `dlcv-project-code.zip` | `DLCV Project Code` | Readable source, configs, notebook and source revision |
 | `dlcv-prepared-training.zip` | `DLCV Prepared Training` | Both prepared image datasets, manifests, fixed splits and preparation reports |
 
+Both packages were created and passed complete ZIP CRC checks on 2026-10-31.
+The code ZIP is 41,512 bytes; the data ZIP is 1,290,722,650 bytes (about 1.29 GB).
+The data ZIP contains exactly 129,774 images and six manifest/report/split files.
+The code snapshot records revision `f038c898f0e9c97f54c6253bc31e8c5fba3b7e34`.
+
 Open [Kaggle's dataset uploader](https://www.kaggle.com/datasets/new).
 Upload the code ZIP, enter its title, select **Private**, and create the dataset.
 Repeat for the training-data ZIP, also **Private**. Wait until processing finishes.
@@ -89,6 +94,14 @@ Expected output:
 
 The image-path check may take a few minutes. If anything is blocked, keep training
 off and share the error text. There is no need to re-download the original data.
+In an additional VS Code code cell, confirm the remote GPU too:
+
+```python
+import torch
+assert torch.cuda.is_available(), "Enable a Kaggle GPU and reconnect the kernel."
+print(torch.cuda.get_device_name(0))
+```
+
 At this point, tell the coding agent **"Kaggle inspection passed"**. The setup is
 complete. This package contains the existing baseline configurations; an upload
 does not itself create a new accuracy-improvement experiment.

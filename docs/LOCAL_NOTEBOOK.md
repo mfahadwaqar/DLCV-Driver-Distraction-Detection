@@ -2,6 +2,10 @@
 
 Open `notebooks/driver_monitoring_training.ipynb` in VS Code. The default is a read-only preflight: it checks the kernel, prepared manifests, image paths, labels and saved subject splits. It does not train or change a Kaggle notebook. Existing notebooks and outputs remain available.
 
+For the prepared upload ZIPs and exact connection checklist, follow
+[Kaggle setup steps](KAGGLE_SETUP_STEPS.md). Local data preparation is already
+complete on this computer; the preparation command below is for recovery/reuse.
+
 ## 1. Prepare the local data once
 
 From the repository root in PowerShell, use the project Python environment:

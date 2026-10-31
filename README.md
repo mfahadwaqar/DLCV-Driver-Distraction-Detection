@@ -1,11 +1,20 @@
 # Driver Distraction and Drowsiness Monitoring
 
-See [Kaggle workflow](docs/KAGGLE.md) for committed-code submission, run status,
-and downloading saved experiment outputs to this local repository.
+Start with the [local workflow](docs/LOCAL_FIRST_WORKFLOW.md) and
+[training notebook guide](docs/LOCAL_NOTEBOOK.md). Use
+`notebooks/driver_monitoring_training.ipynb` as the current notebook. Original data,
+preparation and code live locally; remote GPU execution requires a separate copy
+of prepared inputs. Earlier notebooks and [Kaggle CLI instructions](docs/KAGGLE.md)
+remain available as experiment history.
 
-AIT DLCV project. A first real-data RT-BENE **eye-state** baseline is complete;
+Local preparation is complete: 22,424 State Farm images and 107,350 RT-BENE eye
+crops passed decoding. See [verified local status](docs/LOCAL_PREPARATION_STATUS.md)
+for fixed splits, video-data readiness and remaining annotation work.
+
+AIT DLCV project. RT-BENE **eye-state** and State Farm distraction baselines are complete;
 the full distraction and drowsiness system is still in progress. See the
-[RT-BENE result](docs/RT_BENE_RESULTS.md), [Phase 1 status and commands](docs/phase1.md), and
+[RT-BENE result](docs/RT_BENE_RESULTS.md), [State Farm results](docs/STATE_FARM_RESULTS.md),
+[Phase 1 status and commands](docs/phase1.md), and
 [data handoff](docs/PHASE1_DATA.md). Unit-test fixtures are synthetic and do not
 establish detection accuracy.
 The supplied proposal defines [project scope](docs/SCOPE.md): a lightweight shared

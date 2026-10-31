@@ -1,9 +1,20 @@
 # Local-first downloads and training handoff
 
-Updated 2026-10-31. This workflow supersedes earlier instructions to download raw
-data inside Kaggle. Keep original data, preprocessing code and notebooks on this
-computer. Download now; validate and prepare locally afterward. Do not start a
-remote training run as part of downloading.
+Updated 2026-10-31. The selected downloads and local preparation are complete;
+**do not download these datasets again**. State Farm has 22,424 prepared images
+and RT-BENE has 107,350 prepared eye crops, all decoded successfully. All six
+selected DMD archives passed integrity checks, and 126 unique NITYMED videos are
+verified. NITYMED participant identities and event intervals still need annotation.
+
+Continue with the [local notebook guide](LOCAL_NOTEBOOK.md) and
+`notebooks/driver_monitoring_training.ipynb`. Keep `RUN_TRAINING = False` for
+inspection. See [preparation evidence](LOCAL_PREPARATION_STATUS.md).
+
+This workflow supersedes earlier instructions to download raw data inside Kaggle.
+Keep original data, preprocessing code and notebooks on this computer. The download
+steps below are recovery instructions for a missing source file or a new machine;
+they are not outstanding tasks on this computer. Do not start a remote training
+run as part of downloading.
 
 NITYMED update: all 130 links in the current 720p listing have now been processed
 automatically. The 126 unique MP4s are already in `data/nitymed/source/`; do not

@@ -1,6 +1,10 @@
 # Next distraction experiment: regularized MobileNet
 
-Prepared 2026-11-01. No new research training has run for this candidate.
+Prepared and run on 2026-11-01. The candidate completed 15 epochs, selecting epoch 9.
+Validation accuracy was 69.99% and macro-F1 61.84%; the earlier baseline remains
+the reference under the macro-F1 criterion. The full model backup is restored
+locally. See [measured results](STATE_FARM_REGULARIZED_RESULTS.md). The instructions
+below document the completed experiment; do not rerun it unchanged.
 
 The completed baseline achieved validation accuracy 66.04% and macro-F1 63.15%.
 Training loss fell near zero while validation macro-F1 varied substantially.

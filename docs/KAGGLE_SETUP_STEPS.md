@@ -1,5 +1,8 @@
 # Connect the local notebook to Kaggle
 
+For the next candidate, follow [the regularized experiment steps](NEXT_DISTRACTION_EXPERIMENT.md).
+Existing users only need the new code dataset version; the prepared data is reusable.
+
 Use this checklist after the verified local preparation. All original data stays
 on this computer. Upload copies of the two prepared ZIPs below; no raw archive or
 video upload is needed for these two image-training tasks.
@@ -10,13 +13,14 @@ The packages are in the project's `.cache/kaggle_setup/` folder:
 
 | Local ZIP | Kaggle dataset title | Contents |
 | --- | --- | --- |
-| `dlcv-project-code.zip` | `DLCV Project Code` | Readable source, configs, notebook and source revision |
+| `dlcv-project-code-v2.zip` | `DLCV Project Code` | Updated readable source, configs, notebook and source revision |
 | `dlcv-prepared-training.zip` | `DLCV Prepared Training` | Both prepared image datasets, manifests, fixed splits and preparation reports |
 
-Both packages were created and passed complete ZIP CRC checks on 2026-10-31.
-The code ZIP is 41,512 bytes; the data ZIP is 1,290,722,650 bytes (about 1.29 GB).
+The data package passed complete ZIP CRC checks on 2026-10-31.
+The data ZIP is 1,290,722,650 bytes (about 1.29 GB).
 The data ZIP contains exactly 129,774 images and six manifest/report/split files.
-The code snapshot records revision `f038c898f0e9c97f54c6253bc31e8c5fba3b7e34`.
+The code snapshot records its revision in `project/SOURCE_COMMIT`; use the v2
+inventory for its current size/hash. The original v1 code ZIP is retained as history.
 
 Open [Kaggle's dataset uploader](https://www.kaggle.com/datasets/new).
 Upload the code ZIP, enter its title, select **Private**, and create the dataset.
@@ -66,13 +70,12 @@ RUN_TRAINING = False
 TASK = "state_farm"
 FAST_RUN = False
 DEVICE = "cuda"
-REMOTE_REPO_ROOT = "/kaggle/input/dlcv-project-code/project"
-REMOTE_BUNDLE_ROOT = "/kaggle/input/dlcv-prepared-training"
+REMOTE_REPO_ROOT = "/kaggle/input/datasets/mfahadwaqar2002/dlcv-project-code/project"
+REMOTE_BUNDLE_ROOT = "/kaggle/input/datasets/mfahadwaqar2002/dlcv-prepared-training"
 ```
 
-These are example mount paths for the requested dataset names. Use the actual
-paths in Kaggle's Input file tree if different. Some sessions use paths containing
-`/kaggle/input/datasets/<owner>/<dataset>/`. The source root must directly contain
+These paths were copied from this account's Kaggle Input file tree. Use the actual
+paths shown there if a future session differs. The source root must directly contain
 `src/` and `configs/`; the bundle root must directly contain `data/`. Do not enter
 an `E:` path or a Kaggle webpage URL.
 
@@ -92,7 +95,12 @@ Expected output:
 - RT-BENE: `ready: true`, 107,350 images.
 - `Selected task: READY` and `Training skipped`.
 
-The image-path check may take a few minutes. If anything is blocked, keep training
+Step 3 now prints manifest, directory-level image-count and split-verification
+progress. It resolves each parent directory once and checks every referenced file
+against that directory's entries. It does not decode images again. An older copy
+that silently resolves every individual image path can be much slower on remote
+storage; use the current local notebook for this fix, without re-uploading data.
+If anything is blocked, keep training
 off and share the error text. There is no need to re-download the original data.
 In an additional VS Code code cell, confirm the remote GPU too:
 
@@ -103,8 +111,8 @@ print(torch.cuda.get_device_name(0))
 ```
 
 At this point, tell the coding agent **"Kaggle inspection passed"**. The setup is
-complete. This package contains the existing baseline configurations; an upload
-does not itself create a new accuracy-improvement experiment.
+complete. The current State Farm selection is the regularized candidate described
+in the experiment guide. An upload does not itself train the model.
 
 The private prepared-data dataset can be reused across sessions. Later source
 changes require a new code snapshot/dataset version; editing a local `.py` file

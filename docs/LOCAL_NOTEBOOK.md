@@ -45,13 +45,20 @@ Leave `RUN_TRAINING = False` and run all cells in order. Confirm the printed Pyt
 
 The notebook reads existing split files and rejects missing images, unexpected datasets, split fingerprint/config differences, subject leakage, duplicate samples and missing train/validation class support. It never creates a new split. If a check fails, fix or finish explicit preparation, then rerun preflight.
 
+Step 3 groups image checks by directory, resolves each parent once, and prints
+progress with elapsed seconds. Every manifest filename is still checked against
+regular files in its directory; symlink targets must remain inside the prepared
+root. This avoids repeated parent-path resolution for over 129,000 images on remote
+storage. After this change, an actual local inspection of both complete datasets
+and all notebook code cells finished in 4.2 seconds; remote timing is not measured.
+
 ## 3. Choose one supported task
 
 Set the controls near the top of the notebook:
 
 | Control | Purpose |
 | --- | --- |
-| `TASK = "state_farm"` | Five project distraction classes, using `configs/state_farm_pretrained.yaml` |
+| `TASK = "state_farm"` | Five project distraction classes, using `configs/state_farm_regularized.yaml` |
 | `TASK = "rt_bene"` | Open versus closed/blinking eyes, using `configs/phase1.yaml` |
 | `RUN_TRAINING = False` | Inspect only; the default |
 | `RUN_TRAINING = True` | Explicitly start the selected task in step 5 |
@@ -85,5 +92,13 @@ Training writes a new unique folder under `results/experiments/` locally or `/ka
 `run_provenance.json` records the Git revision when present, visible source/config SHA-256 hashes, manifest/split hashes, split fingerprint and command. These hashes identify an uncommitted or copied snapshot, while a revision alone may not. No repository `SOURCE_COMMIT` file is rewritten. The trainer's older summary may say `local-unbundled`; use the notebook's provenance for the full source identity.
 
 Step 6 reads results without training. Set `RESULTS_RUN` to an earlier experiment folder to inspect it. Use validation metrics for model choices and reserve the test split for final evaluation. Fast smoke runs and per-frame scores do not establish event-level drowsiness performance.
+
+Step 7 attaches a compact experiment ZIP to notebook output. After it displays
+**MODEL BACKUP ATTACHED**, save the local notebook with Ctrl+S before stopping the
+remote session. Recover it locally with `python -m src.train.notebook_backup
+notebooks/driver_monitoring_training.ipynb`. Keep those output attachments; ordinary
+printed metrics alone cannot recover a checkpoint. See the
+[next experiment guide](NEXT_DISTRACTION_EXPERIMENT.md) for the current recipe and
+the code-only upload update.
 
 After a remote run, manually download the entire experiment folder before ending the session, then place it under local `results/experiments/` if desired. Keep source snapshot/provenance, checkpoint, config, splits, metrics, predictions and logs together. Kaggle working storage is temporary unless you explicitly save or download its outputs.

@@ -37,9 +37,18 @@ def seed_everything(seed):
     torch.set_num_threads(2)
 
 
-def image_transform(size, train=False):
+def image_transform(size, train=False, augmentation="baseline"):
+    if augmentation not in {"baseline", "driver"}:
+        raise ValueError("Unknown augmentation recipe")
     ops = [transforms.Resize((size, size))]
-    if train:
+    if train and augmentation == "driver":
+        ops.extend(
+            [
+                transforms.RandomAffine(degrees=5, translate=(0.04, 0.04), scale=(0.95, 1.05)),
+                transforms.ColorJitter(brightness=0.25, contrast=0.2, saturation=0.15),
+            ]
+        )
+    elif train:
         ops.append(transforms.RandomHorizontalFlip())
     ops.extend(
         [transforms.ToTensor(), transforms.Normalize([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])]
@@ -125,9 +134,19 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
     if device == "cuda" and not torch.cuda.is_available():
         raise RuntimeError("CUDA requested but unavailable; select a Kaggle GPU")
     output.mkdir(parents=True, exist_ok=True)
+    evaluate_test = config.get("evaluate_test", True)
+    if not isinstance(evaluate_test, bool):
+        raise ValueError("evaluate_test must be boolean")
     loaders = {}
-    for name, group in parts.items():
-        dataset = ImageDataset(root, group, image_transform(config["image_size"], name == "train"))
+    for name in ("train", "val", "test") if evaluate_test else ("train", "val"):
+        group = parts[name]
+        dataset = ImageDataset(
+            root,
+            group,
+            image_transform(
+                config["image_size"], name == "train", config.get("augmentation", "baseline")
+            ),
+        )
         loaders[name] = DataLoader(
             dataset,
             batch_size=config["batch_size"],
@@ -137,7 +156,13 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
             generator=torch.Generator().manual_seed(config["seed"]),
         )
     model = build_baseline(len(labels), config["pretrained"]).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=config["learning_rate"])
+    optimizer_name = config.get("optimizer", "adam")
+    if optimizer_name not in {"adam", "adamw"}:
+        raise ValueError("Unknown optimizer")
+    optimizer_class = torch.optim.AdamW if optimizer_name == "adamw" else torch.optim.Adam
+    optimizer = optimizer_class(
+        model.parameters(), lr=config["learning_rate"], weight_decay=config.get("weight_decay", 0.0)
+    )
     train_counts, weight_values, class_weights = training_class_weights(
         parts["train"], labels, device, label_key
     )
@@ -149,6 +174,18 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
     epochs = config["fast_epochs"] if fast else config["epochs"]
     if epochs < 1:
         raise ValueError("At least one epoch required")
+    schedule = config.get("scheduler", "none")
+    if schedule not in {"none", "cosine"}:
+        raise ValueError("Unknown learning rate schedule")
+    scheduler = (
+        torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+        if schedule == "cosine"
+        else None
+    )
+    patience = config.get("early_stopping_patience", 0)
+    if not isinstance(patience, int) or patience < 0:
+        raise ValueError("early_stopping_patience must be a nonnegative integer")
+    stale, best_epoch = 0, None
     for epoch in range(epochs):
         model.train()
         loss_sum, count = 0.0, 0
@@ -173,10 +210,19 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
         print(json.dumps(history[-1]), flush=True)
         if val["macro_f1"] > best:
             best = val["macro_f1"]
+            best_epoch, stale = epoch + 1, 0
             torch.save(model.state_dict(), output / "best.pt")
+        else:
+            stale += 1
+        (output / "history.json").write_text(json.dumps(history, indent=2), encoding="utf-8")
+        if scheduler is not None:
+            scheduler.step()
+        if patience and stale >= patience:
+            print(f"Early stopping; best validation checkpoint: epoch {best_epoch}", flush=True)
+            break
     model.load_state_dict(torch.load(output / "best.pt", map_location=device, weights_only=True))
     reports = {}
-    for split in ("val", "test"):
+    for split in ("val", "test") if evaluate_test else ("val",):
         actual, predicted, probs = predict(model, loaders[split], device, labels, label_key)
         report = classification_metrics(actual, predicted, names)
         report.update(
@@ -207,6 +253,8 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
         "device": device,
         "class_ids": labels,
         "label_key": label_key,
+        "test_evaluated": evaluate_test,
+        "best_epoch": best_epoch,
         "unsupported_classes": [name for i, name in enumerate(taxonomy) if i not in labels],
         "train_class_counts": dict(zip(names, train_counts, strict=True)),
         "class_weights": dict(zip(names, weight_values, strict=True)),

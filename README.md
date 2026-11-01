@@ -11,6 +11,10 @@ Local preparation is complete: 22,424 State Farm images and 107,350 RT-BENE eye
 crops passed decoding. See [verified local status](docs/LOCAL_PREPARATION_STATUS.md)
 for fixed splits, video-data readiness and remaining annotation work.
 
+The next run is the [regularized distraction candidate](docs/NEXT_DISTRACTION_EXPERIMENT.md).
+Update only the private code input, inspect first, and save the notebook's Step 7
+model-backup output after training. Candidate selection uses validation scores.
+
 AIT DLCV project. RT-BENE **eye-state** and State Farm distraction baselines are complete;
 the full distraction and drowsiness system is still in progress. See the
 [RT-BENE result](docs/RT_BENE_RESULTS.md), [State Farm results](docs/STATE_FARM_RESULTS.md),

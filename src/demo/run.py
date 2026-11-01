@@ -13,7 +13,7 @@ from PIL import Image
 
 from src.data.landmarks import FaceFeatures
 from src.data.schema import DISTRACTION
-from src.models.baseline import build_baseline
+from src.models.baseline import SUPPORTED_MODELS, build_baseline
 from src.train.phase1 import image_transform
 
 
@@ -51,10 +51,7 @@ class Classifier:
         if config.get("label_key", "label_drowsiness") != target:
             raise ValueError(f"Wrong checkpoint task in {folder}")
         expected = [0, 1] if target == "label_drowsiness" else [0, 1, 2, 3, 5]
-        if self.class_ids != expected or config["model"] not in {
-            "mobilenet_v3_small",
-            "efficientnet_b0",
-        }:
+        if self.class_ids != expected or config["model"] not in SUPPORTED_MODELS:
             raise ValueError("Unsupported model or class mapping")
         self.device = device
         self.model = (

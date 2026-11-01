@@ -33,7 +33,7 @@ def test_checkpoint_task_mismatch_fails_before_loading_weights(tmp_path):
         Classifier(tmp_path, "label_drowsiness")
 
 
-@pytest.mark.parametrize("architecture", ["mobilenet_v3_small", "efficientnet_b0"])
+@pytest.mark.parametrize("architecture", demo.SUPPORTED_MODELS)
 def test_pretrained_checkpoint_load_does_not_download_weights_for_inference(
     tmp_path, monkeypatch, architecture
 ):

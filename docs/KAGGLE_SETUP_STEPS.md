@@ -1,6 +1,6 @@
 # Connect the local notebook to Kaggle
 
-For the next candidate, follow [the EfficientNet experiment steps](EFFICIENTNET_EXPERIMENT.md).
+For the next candidates, follow [the two-model comparison steps](MODEL_COMPARISON.md).
 Existing users only need the new code dataset version; the prepared data is reusable.
 
 Use this checklist after the verified local preparation. All original data stays
@@ -13,13 +13,13 @@ The packages are in the project's `.cache/kaggle_setup/` folder:
 
 | Local ZIP | Kaggle dataset title | Contents |
 | --- | --- | --- |
-| `dlcv-project-code-v3.zip` | `DLCV Project Code` | Updated readable source, configs, notebook and source revision |
+| `dlcv-project-code-v4.zip` | `DLCV Project Code` | Updated readable source, configs, notebook and source revision |
 | `dlcv-prepared-training.zip` | `DLCV Prepared Training` | Both prepared image datasets, manifests, fixed splits and preparation reports |
 
 The data package passed complete ZIP CRC checks on 2026-10-31.
 The data ZIP is 1,290,722,650 bytes (about 1.29 GB).
 The data ZIP contains exactly 129,774 images and six manifest/report/split files.
-The code snapshot records its revision in `project/SOURCE_COMMIT`; use the v3
+The code snapshot records its revision in `project/SOURCE_COMMIT`; use the v4
 inventory for its current size/hash. Earlier code ZIPs are retained as history.
 
 Open [Kaggle's dataset uploader](https://www.kaggle.com/datasets/new).
@@ -68,9 +68,10 @@ In the first code cell, keep inspection mode and enter the input roots:
 ```python
 RUN_TRAINING = False
 TASK = "state_farm"
+DISTRACTION_MODEL = "efficientnet_b2"
 FAST_RUN = False
 DEVICE = "cuda"
-REMOTE_REPO_ROOT = ""  # Detect the current EfficientNet source input automatically.
+REMOTE_REPO_ROOT = ""  # Detect the current model-comparison source input.
 REMOTE_BUNDLE_ROOT = "/kaggle/input/datasets/mfahadwaqar2002/dlcv-prepared-training"
 ```
 
@@ -112,7 +113,7 @@ print(torch.cuda.get_device_name(0))
 ```
 
 At this point, tell the coding agent **"Kaggle inspection passed"**. The setup is
-complete. The current State Farm selection is the EfficientNet candidate described
+complete. The current State Farm selection is the candidate in DISTRACTION_MODEL, described
 in the experiment guide. An upload does not itself train the model.
 
 The private prepared-data dataset can be reused across sessions. Later source

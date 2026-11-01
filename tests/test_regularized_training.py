@@ -8,6 +8,7 @@ from torchvision import transforms
 from src.data.mrl import ImageDataset, index_mrl
 from src.data.splits import saved_splits
 from src.demo.run import Classifier
+from src.models.baseline import SUPPORTED_MODELS
 from src.train.phase1 import image_transform, train
 
 
@@ -26,7 +27,7 @@ def test_driver_augmentation_is_train_only_and_preserves_output_shape():
         image_transform(64, augmentation="typo")
 
 
-@pytest.mark.parametrize("architecture", ["mobilenet_v3_small", "efficientnet_b0"])
+@pytest.mark.parametrize("architecture", SUPPORTED_MODELS)
 def test_validation_only_recipe_never_opens_test_images_and_checkpoint_loads(
     tmp_path, monkeypatch, architecture
 ):
@@ -76,4 +77,5 @@ def test_validation_only_recipe_never_opens_test_images_and_checkpoint_loads(
     assert summary["best_epoch"] == 1
     assert len(json.loads((output / "history.json").read_text())) == 1
     classifier = Classifier(output, "label_drowsiness")
-    assert classifier.model.classifier[-1].out_features == 2
+    head = classifier.model.fc if architecture == "resnet18" else classifier.model.classifier[-1]
+    assert head.out_features == 2

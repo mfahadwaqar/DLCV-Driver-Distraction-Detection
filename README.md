@@ -14,6 +14,8 @@ for fixed splits, video-data readiness and remaining annotation work.
 The [EfficientNet-B0 comparison](docs/EFFICIENTNET_RESULTS.md) completed at 86.50%
 validation accuracy and 81.18% macro-F1. Its model backup is restored locally;
 held-out test scoring is pending. Candidate selection uses validation scores.
+The next [two-model comparison](docs/MODEL_COMPARISON.md) prepares EfficientNet-B2
+and ResNet-18 through one code upload; the same guide explains each dataset's role.
 
 AIT DLCV project. RT-BENE **eye-state** and State Farm distraction baselines are complete;
 the full distraction and drowsiness system is still in progress. See the

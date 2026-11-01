@@ -1,7 +1,10 @@
 # EfficientNet-B0 backbone comparison
 
-Prepared on 2026-11-01. Real EfficientNet training/results are pending. The
-existing MobileNet checkpoints and completed notebooks are preserved.
+Prepared and completed on 2026-11-01. EfficientNet reached 86.50% validation
+accuracy and 81.18% macro-F1; its checkpoint and full backup are restored locally.
+See [verified results](EFFICIENTNET_RESULTS.md). The instructions below document
+the completed run; do not rerun it unchanged. Existing MobileNet checkpoints and
+completed notebooks remain preserved.
 
 ## Validation error review completed
 

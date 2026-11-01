@@ -1,5 +1,9 @@
 # State Farm results
 
+Update 2026-11-01: [EfficientNet-B0](EFFICIENTNET_RESULTS.md) is the best validation
+candidate at 86.50% accuracy and 81.18% macro-F1. Its test scoring is pending.
+The earlier baseline/pretrained test comparison below remains historical evidence.
+
 The completed pretrained MobileNetV3-Small experiment achieved test macro F1 of **0.584755**, compared with **0.315119** for the random-initialization baseline, on exactly the same held-out drivers.
 
 Both runs performed full training on Kaggle with a Tesla T4 (`fast: false`). Scores below come from saved evaluation JSON, not notebook completion status.

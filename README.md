@@ -11,9 +11,9 @@ Local preparation is complete: 22,424 State Farm images and 107,350 RT-BENE eye
 crops passed decoding. See [verified local status](docs/LOCAL_PREPARATION_STATUS.md)
 for fixed splits, video-data readiness and remaining annotation work.
 
-The next run is the [EfficientNet-B0 comparison](docs/EFFICIENTNET_EXPERIMENT.md).
-Update only the private code input, inspect first, and save the notebook's Step 7
-model-backup output after training. Candidate selection uses validation scores.
+The [EfficientNet-B0 comparison](docs/EFFICIENTNET_RESULTS.md) completed at 86.50%
+validation accuracy and 81.18% macro-F1. Its model backup is restored locally;
+held-out test scoring is pending. Candidate selection uses validation scores.
 
 AIT DLCV project. RT-BENE **eye-state** and State Farm distraction baselines are complete;
 the full distraction and drowsiness system is still in progress. See the

@@ -58,7 +58,7 @@ Set the controls near the top of the notebook:
 
 | Control | Purpose |
 | --- | --- |
-| `TASK = "state_farm"` | Five project distraction classes, using `configs/state_farm_regularized.yaml` |
+| `TASK = "state_farm"` | Five project distraction classes, using `configs/state_farm_efficientnet.yaml` |
 | `TASK = "rt_bene"` | Open versus closed/blinking eyes, using `configs/phase1.yaml` |
 | `RUN_TRAINING = False` | Inspect only; the default |
 | `RUN_TRAINING = True` | Explicitly start the selected task in step 5 |
@@ -98,7 +98,7 @@ Step 7 attaches a compact experiment ZIP to notebook output. After it displays
 remote session. Recover it locally with `python -m src.train.notebook_backup
 notebooks/driver_monitoring_training.ipynb`. Keep those output attachments; ordinary
 printed metrics alone cannot recover a checkpoint. See the
-[next experiment guide](NEXT_DISTRACTION_EXPERIMENT.md) for the current recipe and
+[EfficientNet experiment guide](EFFICIENTNET_EXPERIMENT.md) for the current recipe and
 the code-only upload update.
 
 After a remote run, manually download the entire experiment folder before ending the session, then place it under local `results/experiments/` if desired. Keep source snapshot/provenance, checkpoint, config, splits, metrics, predictions and logs together. Kaggle working storage is temporary unless you explicitly save or download its outputs.

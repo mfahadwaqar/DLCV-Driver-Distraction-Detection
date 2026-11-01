@@ -11,7 +11,7 @@ Local preparation is complete: 22,424 State Farm images and 107,350 RT-BENE eye
 crops passed decoding. See [verified local status](docs/LOCAL_PREPARATION_STATUS.md)
 for fixed splits, video-data readiness and remaining annotation work.
 
-The next run is the [regularized distraction candidate](docs/NEXT_DISTRACTION_EXPERIMENT.md).
+The next run is the [EfficientNet-B0 comparison](docs/EFFICIENTNET_EXPERIMENT.md).
 Update only the private code input, inspect first, and save the notebook's Step 7
 model-backup output after training. Candidate selection uses validation scores.
 

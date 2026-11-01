@@ -26,7 +26,10 @@ def test_driver_augmentation_is_train_only_and_preserves_output_shape():
         image_transform(64, augmentation="typo")
 
 
-def test_validation_only_recipe_never_opens_test_images_and_checkpoint_loads(tmp_path, monkeypatch):
+@pytest.mark.parametrize("architecture", ["mobilenet_v3_small", "efficientnet_b0"])
+def test_validation_only_recipe_never_opens_test_images_and_checkpoint_loads(
+    tmp_path, monkeypatch, architecture
+):
     data = tmp_path / "data"
     data.mkdir()
     for subject in range(1, 7):
@@ -46,7 +49,7 @@ def test_validation_only_recipe_never_opens_test_images_and_checkpoint_loads(tmp
     monkeypatch.setattr(ImageDataset, "__getitem__", guarded)
     config = dict(
         seed=42,
-        model="mobilenet_v3_small",
+        model=architecture,
         split_fractions=[0.7, 0.15, 0.15],
         fast_samples_per_split=8,
         image_size=64,
@@ -66,6 +69,7 @@ def test_validation_only_recipe_never_opens_test_images_and_checkpoint_loads(tmp
     output = tmp_path / "model"
     summary = train(config, data, output, split_path)
     assert summary["test_evaluated"] is False
+    assert summary["model"] == architecture
     assert set(summary["macro_f1"]) == {"val"}
     assert not (output / "test.json").exists()
     assert not (output / "test_predictions.csv").exists()

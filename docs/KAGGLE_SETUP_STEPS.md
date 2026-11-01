@@ -1,6 +1,6 @@
 # Connect the local notebook to Kaggle
 
-For the next candidate, follow [the regularized experiment steps](NEXT_DISTRACTION_EXPERIMENT.md).
+For the next candidate, follow [the EfficientNet experiment steps](EFFICIENTNET_EXPERIMENT.md).
 Existing users only need the new code dataset version; the prepared data is reusable.
 
 Use this checklist after the verified local preparation. All original data stays
@@ -13,14 +13,14 @@ The packages are in the project's `.cache/kaggle_setup/` folder:
 
 | Local ZIP | Kaggle dataset title | Contents |
 | --- | --- | --- |
-| `dlcv-project-code-v2.zip` | `DLCV Project Code` | Updated readable source, configs, notebook and source revision |
+| `dlcv-project-code-v3.zip` | `DLCV Project Code` | Updated readable source, configs, notebook and source revision |
 | `dlcv-prepared-training.zip` | `DLCV Prepared Training` | Both prepared image datasets, manifests, fixed splits and preparation reports |
 
 The data package passed complete ZIP CRC checks on 2026-10-31.
 The data ZIP is 1,290,722,650 bytes (about 1.29 GB).
 The data ZIP contains exactly 129,774 images and six manifest/report/split files.
-The code snapshot records its revision in `project/SOURCE_COMMIT`; use the v2
-inventory for its current size/hash. The original v1 code ZIP is retained as history.
+The code snapshot records its revision in `project/SOURCE_COMMIT`; use the v3
+inventory for its current size/hash. Earlier code ZIPs are retained as history.
 
 Open [Kaggle's dataset uploader](https://www.kaggle.com/datasets/new).
 Upload the code ZIP, enter its title, select **Private**, and create the dataset.
@@ -70,12 +70,13 @@ RUN_TRAINING = False
 TASK = "state_farm"
 FAST_RUN = False
 DEVICE = "cuda"
-REMOTE_REPO_ROOT = "/kaggle/input/datasets/mfahadwaqar2002/dlcv-project-code/project"
+REMOTE_REPO_ROOT = ""  # Detect the current EfficientNet source input automatically.
 REMOTE_BUNDLE_ROOT = "/kaggle/input/datasets/mfahadwaqar2002/dlcv-prepared-training"
 ```
 
-These paths were copied from this account's Kaggle Input file tree. Use the actual
-paths shown there if a future session differs. The source root must directly contain
+The data path was copied from this account's Kaggle Input file tree. Automatic
+source detection handles a single ZIP-name wrapper inside the code dataset. If
+setting a source path explicitly, use the actual Input file tree path; it must contain
 `src/` and `configs/`; the bundle root must directly contain `data/`. Do not enter
 an `E:` path or a Kaggle webpage URL.
 
@@ -111,7 +112,7 @@ print(torch.cuda.get_device_name(0))
 ```
 
 At this point, tell the coding agent **"Kaggle inspection passed"**. The setup is
-complete. The current State Farm selection is the regularized candidate described
+complete. The current State Farm selection is the EfficientNet candidate described
 in the experiment guide. An upload does not itself train the model.
 
 The private prepared-data dataset can be reused across sessions. Later source

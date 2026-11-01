@@ -155,7 +155,9 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
             collate_fn=collate_samples,
             generator=torch.Generator().manual_seed(config["seed"]),
         )
-    model = build_baseline(len(labels), config["pretrained"]).to(device)
+    model = build_baseline(
+        len(labels), config["pretrained"], config.get("model", "mobilenet_v3_small")
+    ).to(device)
     optimizer_name = config.get("optimizer", "adam")
     if optimizer_name not in {"adam", "adamw"}:
         raise ValueError("Unknown optimizer")
@@ -253,6 +255,7 @@ def train(config, root, output, split_path, manifest=None, fast=False, device="c
         "device": device,
         "class_ids": labels,
         "label_key": label_key,
+        "model": config.get("model", "mobilenet_v3_small"),
         "test_evaluated": evaluate_test,
         "best_epoch": best_epoch,
         "unsupported_classes": [name for i, name in enumerate(taxonomy) if i not in labels],

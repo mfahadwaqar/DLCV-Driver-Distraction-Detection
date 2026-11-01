@@ -51,10 +51,17 @@ class Classifier:
         if config.get("label_key", "label_drowsiness") != target:
             raise ValueError(f"Wrong checkpoint task in {folder}")
         expected = [0, 1] if target == "label_drowsiness" else [0, 1, 2, 3, 5]
-        if self.class_ids != expected or config["model"] != "mobilenet_v3_small":
+        if self.class_ids != expected or config["model"] not in {
+            "mobilenet_v3_small",
+            "efficientnet_b0",
+        }:
             raise ValueError("Unsupported model or class mapping")
         self.device = device
-        self.model = build_baseline(len(self.class_ids), pretrained=False).to(device).eval()
+        self.model = (
+            build_baseline(len(self.class_ids), pretrained=False, model_name=config["model"])
+            .to(device)
+            .eval()
+        )
         self.model.load_state_dict(
             torch.load(self.folder / "best.pt", map_location=device, weights_only=True)
         )

@@ -1,15 +1,17 @@
 # Additional models and dataset roles
 
-Prepared 2026-11-01. EfficientNet-B0 remains the best completed distraction
+Updated 2026-11-03. EfficientNet-B0 remains the best completed distraction
 candidate: **86.50% validation accuracy / 81.18% validation macro-F1**. Its
-checkpoint is restored locally. EfficientNet-B2 and ResNet-18 are prepared but
-have no real project results yet. A 90% result is a goal, not a prediction.
+checkpoint is restored locally. [EfficientNet-B2 completed](EFFICIENTNET_B2_RESULTS.md)
+at 84.85% validation accuracy / 78.06% macro-F1, below B0. Its checkpoint is also
+verified locally. ResNet-18 is prepared but has no project result yet.
+A 90% result is a goal, not a prediction.
 
 ## These datasets do different jobs
 
 | Dataset | Purpose | What has actually trained |
 | --- | --- | --- |
-| State Farm | Five mapped distraction classes | MobileNet variants and EfficientNet-B0; each trained on 14,881 images from 18 drivers |
+| State Farm | Five mapped distraction classes | MobileNet variants, EfficientNet-B0 and B2; each trained on 14,881 images from 18 drivers |
 | RT-BENE | Open versus closed/blinking eyes | A separate MobileNet model trained on 81,046 eye crops from 11 subjects |
 | NITYMED | Potential yawning/microsleep video supervision | Videos verified locally; participant identities and reviewed event intervals are incomplete, so no trained event classifier yet |
 | DMD | External held-out testing | Archives/annotations inspected; never used for training or tuning; model scoring still pending |
@@ -50,6 +52,10 @@ candidate improves the chosen validation criterion. Do not use test scores to
 pick a model. CPU latency and full event-system evaluation remain outstanding.
 
 ## Manual setup: one code upload, two selectable runs
+
+Current position: B2 is complete and its saved notebook/model are backed up
+locally. Continue with ResNet-18 in step 6; the v4 code and prepared-data inputs
+do not need another upload. Steps 1–5 remain the original setup record.
 
 1. In the existing private **DLCV Project Code** dataset, upload
    `.cache/kaggle_setup/dlcv-project-code-v4.zip` through **New Version**.

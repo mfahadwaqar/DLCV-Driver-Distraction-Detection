@@ -36,6 +36,29 @@ establish the five-class action ground truth. No frame was relabeled and no
 threshold or classifier was tuned from this demonstration. A high model
 confidence is not proof that the action label is correct.
 
+### Follow-up visual review: passenger alert appears false
+
+The user reports that no passenger is present. Rechecking six source frames
+spanning 0.00–9.96 seconds shows no visible passenger interaction; the driver is
+predominantly forward-facing and appears to yawn/move his mouth. The constant
+passenger label should therefore be treated as a qualitative false-alert finding,
+not a successful action detection. The earlier completion report should have
+made this visible prediction failure clearer. No automatic safe-driving or event
+ground-truth labels were created from this review.
+
+The class mapping was checked: the saved output classes are [0, 1, 2, 3, 5],
+and both State Farm c9 and project ID 5 mean passenger interaction. Re-running
+the first development frame with the exact saved checkpoint reproduces the logged
+passenger prediction (confidence approximately 0.9942). This excludes a swapped
+display label for that frame. Across the logged preview the confidence ranges
+from 0.9672 to 0.9996; those values do not establish correctness or calibration.
+
+Camera/view differences and learned contextual cues are plausible explanations,
+not isolated causes established by this clip. The distraction head has no yawning
+output, and the separate eye classifier only predicts open/closed eyes. Labeled
+cross-dataset evaluation remains necessary to quantify generalization. Model
+weights, thresholds and the held-out DMD role remain unchanged.
+
 ## Interpretation and performance limits
 
 The combined pipeline produces a playable annotated video, both streams of

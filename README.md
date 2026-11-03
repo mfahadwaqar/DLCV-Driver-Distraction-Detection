@@ -30,6 +30,8 @@ frame-level evaluation remains pending and is excluded from adaptation/model sel
 
 For targeted improvement after the false passenger alert, follow the
 [annotation and fine-tuning guide](docs/ANNOTATION_AND_FINETUNING_GUIDE.md).
+The [rework proposal](docs/SOLUTION_REWORK_PLAN.md) addresses mirror-check versus
+passenger ambiguity and separates observable cues from unsupported action claims.
 The local VIA starter, driver-review CSV and 21 contact sheets are prepared under
 `data/annotations/starter/`. Review a three-clip pilot first. Revised training
 requires reviewed labels and adequate frontal-action coverage; keep DMD unscored

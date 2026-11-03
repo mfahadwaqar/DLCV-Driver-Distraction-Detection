@@ -1,5 +1,12 @@
 # Annotation, driver separation and targeted training
 
+2026-11-04 update: review [the solution rework proposal](SOLUTION_REWORK_PLAN.md)
+before continuing the broad annotation workflow. A simpler local
+`data/annotations/starter/yawn_labeler.html` preloads the three yawning labels;
+the full VIA project-import steps below remain the original multi-task workflow.
+Existing user annotations are preserved. Do not assume a side glance is passenger
+interaction or a mirror check without supporting context.
+
 The immediate goal is a small, correctly labeled development pilot, followed by
 training on suitable examples. The existing State Farm test and video demo are
 complete; neither establishes accurate frontal-camera distraction recognition.

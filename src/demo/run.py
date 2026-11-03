@@ -4,6 +4,7 @@ import argparse
 import json
 import math
 import time
+from contextlib import ExitStack
 from pathlib import Path
 
 import numpy as np
@@ -109,6 +110,20 @@ def run(args):
         raise ValueError("Choose a new event file to preserve previous runs")
     if not 0 <= args.confidence <= 1:
         raise ValueError("Confidence must be in [0, 1]")
+    if args.max_frames is not None and args.max_frames < 1:
+        raise ValueError("max_frames must be positive")
+    # Construct gates before acquiring models/capture resources.
+    gates = {
+        name: Persistence(args.persist_seconds, args.max_gap) for name in ("eye", "distraction")
+    }
+    artifacts = {
+        name: getattr(args, name, None) for name in ("output_video", "frame_log", "summary")
+    }
+    destinations = [Path(args.events), *[Path(p) for p in artifacts.values() if p is not None]]
+    if len({p.resolve() for p in destinations}) != len(destinations):
+        raise ValueError("Output paths must be distinct")
+    if any(p.exists() for p in destinations):
+        raise ValueError("Choose new output paths to preserve previous runs")
     torch.set_num_threads(2)
     eye = Classifier(args.eye_checkpoint, "label_drowsiness", args.device)
     distraction = Classifier(args.distraction_checkpoint, "label_distraction", args.device)
@@ -124,14 +139,21 @@ def run(args):
         capture.release()
         cropper.close()
         raise ValueError("Video needs valid FPS for temporal inference")
-    gates = {
-        name: Persistence(args.persist_seconds, args.max_gap) for name in ("eye", "distraction")
-    }
     args.events.parent.mkdir(parents=True, exist_ok=True)
     names = {"eye": ("Open eyes", "Closed eyes"), "distraction": DISTRACTION}
     start, frame_index, last_ms = time.monotonic(), 0, -1
+    writer = None
+    durations, eye_frames = [], 0
+    alert_starts = {"eye": 0, "distraction": 0}
     try:
-        with args.events.open("x", encoding="utf-8") as log:
+        with ExitStack() as stack:
+            log = stack.enter_context(args.events.open("x", encoding="utf-8"))
+            frame_log = None
+            if artifacts["frame_log"] is not None:
+                Path(artifacts["frame_log"]).parent.mkdir(parents=True, exist_ok=True)
+                frame_log = stack.enter_context(
+                    Path(artifacts["frame_log"]).open("x", encoding="utf-8")
+                )
             log.write(
                 json.dumps(
                     {
@@ -147,6 +169,7 @@ def run(args):
                 + "\n"
             )
             while args.max_frames is None or frame_index < args.max_frames:
+                frame_start = time.perf_counter()
                 ok, frame = capture.read()
                 if not ok:
                     break
@@ -157,8 +180,12 @@ def run(args):
                 crop = cropper.crop(rgb, timestamp_ms)
                 predictions = {
                     "eye": eye.predict(crop) if crop is not None else (None, 0.0),
-                    "distraction": distraction.predict(rgb) if crop is not None else (None, 0.0),
+                    # The full-frame classifier does not depend on finding an eye crop.
+                    "distraction": distraction.predict(rgb),
                 }
+                duration_ms = (time.perf_counter() - frame_start) * 1000
+                durations.append(duration_ms)
+                eye_frames += crop is not None
                 lines = []
                 for task, (label, confidence) in predictions.items():
                     alert = (
@@ -168,6 +195,7 @@ def run(args):
                         record = {**event, "task": task, "class_name": names[task][event["label"]]}
                         if event["event"] == "start":
                             record["confidence"] = confidence
+                            alert_starts[task] += 1
                         log.write(json.dumps(record) + "\n")
                         log.flush()
                         print(json.dumps(record), flush=True)
@@ -175,8 +203,27 @@ def run(args):
                         "Unknown" if label is None else f"{names[task][label]} ({confidence:.2f})"
                     )
                     lines.append(f"{task}: {text} | alert: {gates[task].active is not None}")
+                if frame_log is not None:
+                    frame_log.write(
+                        json.dumps(
+                            {
+                                "frame": frame_index,
+                                "timestamp": timestamp,
+                                "eye_available": crop is not None,
+                                "predictions": {
+                                    task: {"label": label, "confidence": confidence}
+                                    for task, (label, confidence) in predictions.items()
+                                },
+                                "active_alerts": {
+                                    task: gate.active for task, gate in gates.items()
+                                },
+                                "decode_and_inference_ms": duration_ms,
+                            }
+                        )
+                        + "\n"
+                    )
                 frame_index += 1
-                if not args.no_display:
+                if artifacts["output_video"] is not None or not args.no_display:
                     for i, line in enumerate(lines):
                         cv2.putText(
                             frame,
@@ -187,6 +234,24 @@ def run(args):
                             (0, 0, 255),
                             2,
                         )
+                if artifacts["output_video"] is not None:
+                    if writer is None:
+                        if webcam:
+                            raise ValueError("Saved video needs a file source with known FPS")
+                        path = Path(artifacts["output_video"])
+                        path.parent.mkdir(parents=True, exist_ok=True)
+                        writer = cv2.VideoWriter(
+                            str(path),
+                            cv2.VideoWriter_fourcc(*"mp4v"),
+                            fps,
+                            (frame.shape[1], frame.shape[0]),
+                        )
+                        if not writer.isOpened():
+                            raise RuntimeError("Could not create annotated video")
+                    writer.write(frame)
+                if frame_index == 1 or frame_index % 50 == 0:
+                    print(f"Processed {frame_index} video frames", flush=True)
+                if not args.no_display:
                     cv2.imshow("Driver monitoring baseline demo - Q to quit", frame)
                     if cv2.waitKey(1) & 0xFF == ord("q"):
                         break
@@ -203,9 +268,42 @@ def run(args):
     finally:
         capture.release()
         cropper.close()
+        if writer is not None:
+            writer.release()
         if not args.no_display:
             cv2.destroyAllWindows()
+    if not frame_index:
+        raise ValueError("No video frames could be decoded")
+    summary = {
+        "processed_frames": frame_index,
+        "eye_available_frames": int(eye_frames),
+        "eye_coverage": eye_frames / frame_index,
+        "alert_starts": alert_starts,
+        "processing_seconds": time.monotonic() - start,
+        "decode_and_inference_ms": {
+            "median": float(np.median(durations)),
+            "p95": float(np.percentile(durations, 95)),
+        },
+        "source_fps": fps if not webcam else None,
+        "timestamp_basis": "nominal frame index / FPS" if not webcam else "wall clock",
+        "training_performed": False,
+        "scoring_performed": False,
+        "confidence": args.confidence,
+        "persist_seconds": args.persist_seconds,
+        "max_gap": args.max_gap,
+        "limitations": [
+            "Unscored demonstration; no ground-truth accuracy or event metrics",
+            "Eye classifier predicts open/closed eyes, not yawning, nodding or gaze",
+            "Persistence/confidence settings are unvalidated demonstration defaults",
+            "Decode/inference timing excludes model loading, overlay and output writes",
+        ],
+    }
+    if artifacts["summary"] is not None:
+        path = Path(artifacts["summary"])
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
     print(f"Processed {frame_index} frames. Events: {args.events}")
+    return summary
 
 
 def main():
@@ -223,6 +321,9 @@ def main():
     parser.add_argument("--max-gap", type=float, default=0.75)
     parser.add_argument("--max-frames", type=int)
     parser.add_argument("--no-display", action="store_true")
+    parser.add_argument("--output-video", type=Path)
+    parser.add_argument("--frame-log", type=Path)
+    parser.add_argument("--summary", type=Path)
     run(parser.parse_args())
 
 

@@ -21,8 +21,10 @@ the test result does not change the selected checkpoint.
 
 The [local testing setup](docs/TESTING_SETUP.md) and
 `notebooks/driver_monitoring_testing.ipynb` preserve the completed test reports.
-Next work is video integration and external-test preparation; no repeat test or
-training run is needed to inspect the saved result.
+The [video integration setup](docs/VIDEO_DEMO_SETUP.md) is ready in
+`notebooks/driver_monitoring_video_demo.ipynb`. It runs both saved classifiers on
+local development footage and saves an annotated preview, logs and CPU timings.
+It performs no training or accuracy scoring. DMD external evaluation remains pending.
 
 AIT DLCV project. RT-BENE **eye-state** and State Farm distraction baselines are complete;
 the full distraction and drowsiness system is still in progress. See the

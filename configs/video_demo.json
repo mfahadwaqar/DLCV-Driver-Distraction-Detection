@@ -1,0 +1,12 @@
+{
+  "eye_model_dir": "results/kaggle/20261028T075933392791Z/artifacts/phase1",
+  "eye_checkpoint_sha256": "b2d04237270805a989d6e345e130363d0d60cee5ae1f7a2eba0ebe7a71ae80b3",
+  "eye_model": "mobilenet_v3_small",
+  "eye_image_size": 96,
+  "face_model": "data/models/face_landmarker.task",
+  "face_model_sha256": "64184e229b263107bc2b804c6625db1341ff2bb731874b0bcc2fe6544e0bc9ff",
+  "development_source": "data/nitymed/source/P1042748_720.mp4",
+  "confidence": 0.7,
+  "persist_seconds": 1.0,
+  "max_gap": 0.75
+}

@@ -3,6 +3,8 @@
 For the completed model's next stage, use the separate
 [local testing notebook](TESTING_SETUP.md). It evaluates the frozen ResNet-18
 checkpoint on the local CPU without modifying or rerunning this training notebook.
+After testing, use the [video demonstration setup](VIDEO_DEMO_SETUP.md) to run
+the saved distraction and eye-state classifiers together on development footage.
 
 Open `notebooks/driver_monitoring_training.ipynb` in VS Code. The default is a read-only preflight: it checks the kernel, prepared manifests, image paths, labels and saved subject splits. It does not train or change a Kaggle notebook. Existing notebooks and outputs remain available.
 

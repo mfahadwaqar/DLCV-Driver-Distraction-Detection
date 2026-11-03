@@ -5,7 +5,9 @@ distraction candidate: **87.68% validation accuracy / 85.12% validation macro-F1
 EfficientNet-B0 reached 86.50% / 81.18%, and
 [EfficientNet-B2](EFFICIENTNET_B2_RESULTS.md) reached 84.85% / 78.06%.
 All three checkpoints are verified locally. The planned comparison is complete;
-freeze ResNet-18 before test evaluation. The 90% accuracy goal is not yet reached.
+the subsequent frozen [ResNet-18 test](RESNET18_TEST_RESULTS.md) reached 76.94%
+accuracy / 69.16% macro-F1. Test scores were not used for model selection.
+The 90% accuracy goal is not yet reached.
 
 ## These datasets do different jobs
 
@@ -54,9 +56,10 @@ pick a model. CPU latency and full event-system evaluation remain outstanding.
 ## Manual setup: one code upload, two selectable runs
 
 Current position: both runs are complete and their saved notebooks/models are
-backed up locally. Do not repeat training steps below; they remain the original
-setup record. Continue with the frozen-checkpoint evaluation stage described in
-[the ResNet-18 results](RESNET18_RESULTS.md#next-stage).
+backed up locally. Frozen-checkpoint testing is also complete. Do not repeat
+training steps below; they remain the original setup record. Continue with video
+integration and external-test preparation described in
+[the test results](RESNET18_TEST_RESULTS.md#scope-and-next-work).
 
 1. In the existing private **DLCV Project Code** dataset, upload
    `.cache/kaggle_setup/dlcv-project-code-v4.zip` through **New Version**.

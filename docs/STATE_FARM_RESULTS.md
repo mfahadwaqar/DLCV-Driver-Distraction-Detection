@@ -1,7 +1,8 @@
 # State Farm results
 
 Update 2026-11-03: [ResNet-18](RESNET18_RESULTS.md) is the best validation
-candidate at 87.68% accuracy and 85.12% macro-F1. Its test scoring is pending.
+candidate at 87.68% accuracy and 85.12% macro-F1. Its subsequent
+[test result](RESNET18_TEST_RESULTS.md) is 76.94% accuracy and 69.16% macro-F1.
 The earlier baseline/pretrained test comparison below remains historical evidence.
 
 The completed pretrained MobileNetV3-Small experiment achieved test macro F1 of **0.584755**, compared with **0.315119** for the random-initialization baseline, on exactly the same held-out drivers.

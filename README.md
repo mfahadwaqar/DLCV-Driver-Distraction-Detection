@@ -14,13 +14,15 @@ for fixed splits, video-data readiness and remaining annotation work.
 The [completed model comparison](docs/MODEL_COMPARISON.md) selected
 [ResNet-18](docs/RESNET18_RESULTS.md) at **87.68% validation accuracy / 85.12%
 macro-F1**, ahead of EfficientNet-B0 (86.50% / 81.18%) and B2 (84.85% / 78.06%).
-All checkpoints are recovered locally. ResNet-18 test evaluation is pending;
-candidate selection uses validation scores.
+All checkpoints are recovered locally. The frozen ResNet-18
+[test evaluation](docs/RESNET18_TEST_RESULTS.md) completed at **76.94% accuracy /
+69.16% macro-F1** on five different drivers. Candidate selection used validation;
+the test result does not change the selected checkpoint.
 
-Next, use the [local testing setup](docs/TESTING_SETUP.md) and
-`notebooks/driver_monitoring_testing.ipynb` to evaluate the frozen ResNet-18
-checkpoint on the fixed State Farm test split. This notebook uses the local CPU;
-no Kaggle upload or additional training is needed.
+The [local testing setup](docs/TESTING_SETUP.md) and
+`notebooks/driver_monitoring_testing.ipynb` preserve the completed test reports.
+Next work is video integration and external-test preparation; no repeat test or
+training run is needed to inspect the saved result.
 
 AIT DLCV project. RT-BENE **eye-state** and State Farm distraction baselines are complete;
 the full distraction and drowsiness system is still in progress. See the

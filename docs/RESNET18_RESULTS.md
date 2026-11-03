@@ -1,5 +1,9 @@
 # ResNet-18 validation results
 
+Update: [frozen-checkpoint test evaluation](RESNET18_TEST_RESULTS.md) is complete
+at 76.94% accuracy and 69.16% macro-F1. The remainder of this document records the
+original validation selection and training artifacts.
+
 Completed and verified locally on 2026-11-03. Experiment:
 `20261103T103006Z_state_farm_resnet18_d497ae72`.
 Source revision: `71bfe9113d3aac4cc98558a865263ef6d42caf69`.

@@ -1,17 +1,17 @@
 # Additional models and dataset roles
 
-Updated 2026-11-03. EfficientNet-B0 remains the best completed distraction
-candidate: **86.50% validation accuracy / 81.18% validation macro-F1**. Its
-checkpoint is restored locally. [EfficientNet-B2 completed](EFFICIENTNET_B2_RESULTS.md)
-at 84.85% validation accuracy / 78.06% macro-F1, below B0. Its checkpoint is also
-verified locally. ResNet-18 is prepared but has no project result yet.
-A 90% result is a goal, not a prediction.
+Updated 2026-11-03. [ResNet-18](RESNET18_RESULTS.md) is now the best completed
+distraction candidate: **87.68% validation accuracy / 85.12% validation macro-F1**.
+EfficientNet-B0 reached 86.50% / 81.18%, and
+[EfficientNet-B2](EFFICIENTNET_B2_RESULTS.md) reached 84.85% / 78.06%.
+All three checkpoints are verified locally. The planned comparison is complete;
+freeze ResNet-18 before test evaluation. The 90% accuracy goal is not yet reached.
 
 ## These datasets do different jobs
 
 | Dataset | Purpose | What has actually trained |
 | --- | --- | --- |
-| State Farm | Five mapped distraction classes | MobileNet variants, EfficientNet-B0 and B2; each trained on 14,881 images from 18 drivers |
+| State Farm | Five mapped distraction classes | MobileNet variants, EfficientNet-B0/B2 and ResNet-18; each trained on 14,881 images from 18 drivers |
 | RT-BENE | Open versus closed/blinking eyes | A separate MobileNet model trained on 81,046 eye crops from 11 subjects |
 | NITYMED | Potential yawning/microsleep video supervision | Videos verified locally; participant identities and reviewed event intervals are incomplete, so no trained event classifier yet |
 | DMD | External held-out testing | Archives/annotations inspected; never used for training or tuning; model scoring still pending |
@@ -53,9 +53,10 @@ pick a model. CPU latency and full event-system evaluation remain outstanding.
 
 ## Manual setup: one code upload, two selectable runs
 
-Current position: B2 is complete and its saved notebook/model are backed up
-locally. Continue with ResNet-18 in step 6; the v4 code and prepared-data inputs
-do not need another upload. Steps 1–5 remain the original setup record.
+Current position: both runs are complete and their saved notebooks/models are
+backed up locally. Do not repeat training steps below; they remain the original
+setup record. Continue with the frozen-checkpoint evaluation stage described in
+[the ResNet-18 results](RESNET18_RESULTS.md#next-stage).
 
 1. In the existing private **DLCV Project Code** dataset, upload
    `.cache/kaggle_setup/dlcv-project-code-v4.zip` through **New Version**.

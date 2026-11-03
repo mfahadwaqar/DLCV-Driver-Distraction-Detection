@@ -1,0 +1,18 @@
+{
+  "experiment": "20261103T103006Z_state_farm_resnet18_d497ae72",
+  "model_dir": "results/experiments/20261103T103006Z_state_farm_resnet18_d497ae72/model",
+  "model": "resnet18",
+  "class_ids": [0, 1, 2, 3, 5],
+  "image_size": 224,
+  "checkpoint_sha256": "c4e21db23cd3250fc98dec9f8ea617c162d70273cacc3938ee43fca4ceb6dfe8",
+  "manifest": "data/state_farm/prepared/manifest.csv",
+  "manifest_sha256": "d16fbcecad2caf65118c528b212a1dac0f31cf117ff5e5ee9c609a29e7550b58",
+  "splits": "data/splits/state_farm_splits.json",
+  "split_sha256": "80873fa85dff884ec0127f85cf45fff37b9aeda9cf7f1e92690b03ac586c120e",
+  "split_fingerprint": "373f6b4633427c9e62632227d5698846e95b6c35d8070868b928d4a57494f3ea",
+  "test_samples": 4831,
+  "test_subjects": 5,
+  "selection_metric": "validation_macro_f1",
+  "validation_macro_f1": 0.8511944737687809,
+  "best_epoch": 10
+}

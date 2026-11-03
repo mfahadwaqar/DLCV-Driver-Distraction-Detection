@@ -17,6 +17,11 @@ macro-F1**, ahead of EfficientNet-B0 (86.50% / 81.18%) and B2 (84.85% / 78.06%).
 All checkpoints are recovered locally. ResNet-18 test evaluation is pending;
 candidate selection uses validation scores.
 
+Next, use the [local testing setup](docs/TESTING_SETUP.md) and
+`notebooks/driver_monitoring_testing.ipynb` to evaluate the frozen ResNet-18
+checkpoint on the fixed State Farm test split. This notebook uses the local CPU;
+no Kaggle upload or additional training is needed.
+
 AIT DLCV project. RT-BENE **eye-state** and State Farm distraction baselines are complete;
 the full distraction and drowsiness system is still in progress. See the
 [RT-BENE result](docs/RT_BENE_RESULTS.md), [State Farm results](docs/STATE_FARM_RESULTS.md),

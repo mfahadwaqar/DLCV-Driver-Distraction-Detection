@@ -12,6 +12,7 @@ dependencies = ["PyYAML>=6,<7"]
 [project.optional-dependencies]
 dev = ["pytest>=8,<9", "ruff>=0.9,<1"]
 kaggle = ["kaggle==2.2.5"]
+notebooks = ["ipykernel>=6,<8"]
 phase1 = ["torch", "torchvision", "numpy", "pillow", "scikit-learn",
           "opencv-contrib-python", "mediapipe"]
 ml = ["torch", "torchvision", "timm", "opencv-contrib-python", "mediapipe",

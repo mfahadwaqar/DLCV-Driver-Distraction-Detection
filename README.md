@@ -21,10 +21,12 @@ the test result does not change the selected checkpoint.
 
 The [local testing setup](docs/TESTING_SETUP.md) and
 `notebooks/driver_monitoring_testing.ipynb` preserve the completed test reports.
-The [video integration setup](docs/VIDEO_DEMO_SETUP.md) is ready in
-`notebooks/driver_monitoring_video_demo.ipynb`. It runs both saved classifiers on
-local development footage and saves an annotated preview, logs and CPU timings.
-It performs no training or accuracy scoring. DMD external evaluation remains pending.
+The [video integration demonstration](docs/VIDEO_DEMO_RESULTS.md) completed:
+250 development frames processed, an annotated recording saved, and 17.28-FPS
+CPU loop throughput measured. It performed no training or accuracy scoring;
+the constant passenger-interaction prediction needs labeled evaluation.
+[Setup instructions](docs/VIDEO_DEMO_SETUP.md) remain available. DMD external
+frame-level evaluation is the next stage and remains pending.
 
 AIT DLCV project. RT-BENE **eye-state** and State Farm distraction baselines are complete;
 the full distraction and drowsiness system is still in progress. See the

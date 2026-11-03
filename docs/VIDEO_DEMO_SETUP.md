@@ -1,5 +1,9 @@
 # Run the two saved models on video
 
+Update: the user-facing preview is now complete. See the
+[verified video demonstration results](VIDEO_DEMO_RESULTS.md). Preserve the
+existing output; the steps below document the original run setup.
+
 Use `notebooks/driver_monitoring_video_demo.ipynb` in the local project environment.
 This stage needs no training, Kaggle runtime, new download or data upload. The
 checkpoints, face-landmark asset, FFmpeg and development sample are already local.

@@ -1,0 +1,17 @@
+{
+  "yawn_yes": "Visible yawn: from clear onset of yawning mouth/jaw motion to return toward baseline. Not arbitrary speech or every open mouth.",
+  "yawn_no": "Watched interval with no visible yawn; include reviewed speech, laughter and normal mouth motion as hard negatives when distinguishable.",
+  "eyes_open": "Eyes visibly open. Does not imply global alertness or absence of yawning.",
+  "eyes_closed": "Eyes visibly closed, including blinks. Does not itself diagnose sleep or microsleep.",
+  "distraction_none_visible": "Sufficient visible context to rule out the four target action categories; not proof of gaze on road, alertness or safety.",
+  "phone_use": "Visible evidence of using/holding a phone for a call or texting.",
+  "drinking": "Visible drinking action. Eating requires separate source evidence and annotation review before merging.",
+  "other_object": "Visible mapped radio adjustment, reaching, grooming or other specified object activity; explain the action in notes.",
+  "passenger_interaction": "Evidence of passenger-directed interaction; mouth opening or talking alone is insufficient. Record supporting context in notes.",
+  "yawn_uncertain": "Cannot reliably distinguish yawning from other mouth activity.",
+  "eyes_uncertain": "Eye state is ambiguous.",
+  "distraction_uncertain": "Action or required hand/object/passenger context is ambiguous.",
+  "yawn_not_visible": "Mouth/jaw evidence is not adequately visible.",
+  "eyes_not_visible": "Eye region is not adequately visible.",
+  "distraction_not_visible": "Required driver/hand/object context is not adequately visible."
+}

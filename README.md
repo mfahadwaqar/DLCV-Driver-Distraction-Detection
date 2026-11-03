@@ -26,7 +26,14 @@ The [video integration demonstration](docs/VIDEO_DEMO_RESULTS.md) completed:
 CPU loop throughput measured. It performed no training or accuracy scoring;
 the constant passenger-interaction prediction needs labeled evaluation.
 [Setup instructions](docs/VIDEO_DEMO_SETUP.md) remain available. DMD external
-frame-level evaluation is the next stage and remains pending.
+frame-level evaluation remains pending and is excluded from adaptation/model selection.
+
+For targeted improvement after the false passenger alert, follow the
+[annotation and fine-tuning guide](docs/ANNOTATION_AND_FINETUNING_GUIDE.md).
+The local VIA starter, driver-review CSV and 21 contact sheets are prepared under
+`data/annotations/starter/`. Review a three-clip pilot first. Revised training
+requires reviewed labels and adequate frontal-action coverage; keep DMD unscored
+until the revised models and protocol are frozen.
 
 AIT DLCV project. RT-BENE **eye-state** and State Farm distraction baselines are complete;
 the full distraction and drowsiness system is still in progress. See the
